@@ -11,7 +11,7 @@ export default function Card({
     return (
         <View style={styles.card}>
             <Image
-                source={ imageSource}
+                source={imageSource}
                 style={styles.cardImage}
                 contentFit="cover"
             />
