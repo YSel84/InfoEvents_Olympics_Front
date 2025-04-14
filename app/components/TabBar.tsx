@@ -1,5 +1,6 @@
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { useRouter, useSegments } from 'expo-router';
+import { useRouter } from 'expo-router';
+import { theme } from '../styles/theme';
 
 const tabs = [
     { name: 'Accueil', route: '/' },
@@ -9,7 +10,6 @@ const tabs = [
 
 export default function TabBar() {
     const router = useRouter();
-    const segments = useSegments();
 
     return (
         <View style={styles.container}>
@@ -18,15 +18,7 @@ export default function TabBar() {
                     key={tab.route}
                     onPress={() => router.push(tab.route as any)}
                 >
-                    <Text
-                        style={
-                            segments[0] === tab.route.slice(1)
-                                ? styles.activeTab
-                                : styles.tab
-                        }
-                    >
-                        {tab.name}
-                    </Text>
+                    <Text style={styles.tab}>{tab.name}</Text>
                 </TouchableOpacity>
             ))}
         </View>
@@ -38,17 +30,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         padding: 12,
-        backgroundColor: '#eee',
+        backgroundColor: theme.colors.background,
         borderTopWidth: 1,
-        borderColor: '#ccc',
+        borderColor: theme.colors.border,
     },
     tab: {
         fontSize: 16,
-        color: '#888',
+        color: theme.colors.buttonBackground,
     },
     activeTab: {
         fontSize: 16,
-        color: '#000',
+        color: theme.colors.text,
         fontWeight: 'bold',
     },
 });

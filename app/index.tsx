@@ -7,6 +7,8 @@ import {
 } from 'react-native';
 import { Image } from 'expo-image';
 import Card from './components/Card';
+import { events } from './mock/event';
+import { theme } from './styles/theme';
 
 export default function Index() {
     const { width } = useWindowDimensions();
@@ -15,7 +17,7 @@ export default function Index() {
     return (
         <ScrollView
             contentContainerStyle={styles.container}
-            style={{ backgroundColor: 'gold' }}
+            style={{ backgroundColor: theme.colors.surface }}
         >
             <View style={[styles.heroSection, { height }]}>
                 <Image
@@ -29,10 +31,11 @@ export default function Index() {
             <View style={styles.featured}>
                 <Text style={styles.featuredTitle}>Evénements à la une</Text>
                 <View style={styles.cardGrid}>
-                    {[1, 2, 3].map((i) => (
+                    {events.map((e) => (
                         <Card
-                            key={i}
-                            title={`Evènement ${i}`}
+                            key={e.id}
+                            id={e.id}
+                            title={e.title}
                             imageSource={require('../assets/images/placeholder.png')}
                         />
                     ))}
@@ -44,50 +47,30 @@ export default function Index() {
 
 const styles = StyleSheet.create({
     container: {
-        paddingBottom: 32,
-        backgroundColor: 'gold',
+        paddingBottom: theme.spacing.lg,
+        backgroundColor: theme.colors.surface,
     },
     heroSection: {
         width: '100%',
         position: 'relative',
+        overflow: 'hidden',
     },
 
-    heroOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    heroTitle: {
-        fontSize: 28,
-        color: '#fff',
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    heroSubtitle: {
-        fontSize: 16,
-        color: '#ddd',
-        marginTop: 8,
-        textAlign: 'center',
-    },
     featured: {
-        paddingVertical: 32,
-        paddingHorizontal: 16,
+        paddingVertical: theme.spacing.lg,
+        paddingHorizontal: theme.spacing.md,
     },
     featuredTitle: {
         fontSize: 22,
         fontWeight: 'bold',
-        marginBottom: 16,
+        marginBottom: theme.spacing.md,
         textAlign: 'center',
+        color: theme.colors.buttonBackground,
     },
     cardGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'center',
-        gap: 16,
+        gap: theme.spacing.md,
     },
 });

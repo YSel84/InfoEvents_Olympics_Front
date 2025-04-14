@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../styles/theme';
+import { Image } from 'expo-image';
 
 export default function HeaderWeb() {
     const router = useRouter();
@@ -11,7 +13,11 @@ export default function HeaderWeb() {
                     onPress={() => router.push('/')}
                     style={styles.logoContainer}
                 >
-                    <Text style={styles.logo}>Logo</Text>
+                    <Image
+                        source={require('../../assets/images/logo.png')}
+                        style={styles.logo}
+                        contentFit="contain"
+                    />
                 </TouchableOpacity>
                 <Text style={styles.brand}>InfoEvent My Tickets</Text>
             </View>
@@ -35,7 +41,11 @@ export default function HeaderWeb() {
                     <Text style={styles.navItem}>Se connecter</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => {}}>
-                    <Ionicons name="cart-outline" size={22} color="#fff" />
+                    <Ionicons
+                        name="cart-outline"
+                        size={22}
+                        color={theme.colors.primary}
+                    />
                 </TouchableOpacity>
             </View>
         </View>
@@ -45,18 +55,21 @@ export default function HeaderWeb() {
 const styles = StyleSheet.create({
     container: {
         padding: 16,
-        backgroundColor: '#111',
+        backgroundColor: theme.colors.background,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
+        paddingVertical: theme.spacing.sm,
+        paddingHorizontal: theme.spacing.md,
+        borderBottomWidth: 1,
     },
     leftSection: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     brand: {
-        color: '#fff',
+        color: theme.colors.primary,
         fontSize: 16,
         fontWeight: 'bold',
     },
@@ -64,23 +77,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     welcome: {
-        color: '#fff',
+        color: theme.colors.primary,
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 4,
-    },
-    title: {
-        fontSize: 24,
-        color: '#fff',
-        fontWeight: 'bold',
-        textAlign: 'center',
     },
     navContainer: {
         flexDirection: 'row',
         gap: 12,
     },
     navItem: {
-        color: '#fff',
+        color: theme.colors.primary,
         fontSize: 16,
         marginHorizontal: 8,
     },
@@ -94,10 +101,11 @@ const styles = StyleSheet.create({
         gap: 20,
     },
     logo: {
-        fontSize: 24,
-        color: '#fff',
+        width: 40,
+        height: 40,
+        opacity: 0.9,
     },
     logoContainer: {
-        marginRight: 16,
+        marginRight: theme.spacing.md,
     },
 });
