@@ -1,8 +1,12 @@
 import { View, Text, StyleSheet, ScrollView, Button } from 'react-native';
-import { theme } from './styles/theme';
-import Card from './components/Card';
-import { useEventStore } from './stores/eventStore';
 import Toast from 'react-native-toast-message';
+
+//Components
+import Card from './components/Card';
+import WebWrapper from './components/WebWrapper';
+//Theme & store
+import { useEventStore } from '../stores/eventStore';
+import { theme } from '../styles/theme';
 
 export default function EventScreen() {
     const { visibleCount, increaseVisibleCount } = useEventStore();
@@ -26,41 +30,40 @@ export default function EventScreen() {
     };
 
     return (
-        <ScrollView
-            contentContainerStyle={styles.container}
-            style={{ backgroundColor: theme.colors.page }}
-        >
-            <Text style={styles.title}>Les événements</Text>
-            <Text style={styles.text}>
-                Découvrez les événéments disponibles
-            </Text>
-            <View style={styles.grid}>
-                {visibleEvents.map((event) => (
-                    <Card
-                        key={event.id}
-                        id={event.id}
-                        title={event.title}
-                        imageSource={event.imageSrc}
-                    />
-                ))}
-            </View>
+        <WebWrapper>
+            <ScrollView style={{ backgroundColor: theme.colors.page }}>
+                <Text style={styles.title}>Les événements</Text>
+                <Text style={styles.text}>
+                    Découvrez les événéments disponibles
+                </Text>
+                <View style={styles.grid}>
+                    {visibleEvents.map((event) => (
+                        <Card
+                            key={event.id}
+                            id={event.id}
+                            title={event.title}
+                            imageSource={event.imageSrc}
+                        />
+                    ))}
+                </View>
 
-            <View style={styles.loadMore}>
-                <Button
-                    title="Charger plus"
-                    onPress={handleLoadMore}
-                    color={theme.colors.buttonBackground}
-                />
-            </View>
-            <Toast />
-        </ScrollView>
+                <View style={styles.loadMore}>
+                    <Button
+                        title="Charger plus"
+                        onPress={handleLoadMore}
+                        color={theme.colors.buttonBackground}
+                    />
+                </View>
+                <Toast />
+            </ScrollView>
+        </WebWrapper>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        backgroundColor: theme.colors.page,
+
         alignItems: 'center',
         paddingVertical: theme.spacing.lg,
         paddingHorizontal: theme.spacing.md,

@@ -1,10 +1,14 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { theme } from '../styles/theme';
+import WebWrapper from './components/WebWrapper';
 
 export default function LoremIpsum() {
     return (
-        <View style={styles.container}>
-            <Text> LoginPage</Text>
-        </View>
+        <WebWrapper>
+            <View style={styles.container}>
+                <Text> LoginPage</Text>
+            </View>
+        </WebWrapper>
     );
 }
 

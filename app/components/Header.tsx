@@ -1,11 +1,14 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../styles/theme';
+import { theme } from '../../styles/theme';
 import { Image } from 'expo-image';
+import { useCartStore } from '@/stores/cartStore';
 
 export default function HeaderWeb() {
     const router = useRouter();
+    const total = useCartStore((state) => state.getTotalQuantity());
+
     return (
         <View style={styles.container}>
             <View style={styles.leftSection}>
@@ -40,12 +43,19 @@ export default function HeaderWeb() {
                 <TouchableOpacity onPress={() => router.push('/login')}>
                     <Text style={styles.navItem}>Se connecter</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => {}}>
-                    <Ionicons
-                        name="cart-outline"
-                        size={22}
-                        color={theme.colors.primary}
-                    />
+                <TouchableOpacity onPress={() => router.push('/cart')}>
+                    <View style={styles.iconContainer}>
+                        <Ionicons
+                            name="cart-outline"
+                            size={24}
+                            color={theme.colors.primary}
+                        />
+                        {total > 0 && (
+                            <View style={styles.badge}>
+                                <Text style={styles.badgeText}>{total}</Text>
+                            </View>
+                        )}
+                    </View>
                 </TouchableOpacity>
             </View>
         </View>
@@ -107,5 +117,26 @@ const styles = StyleSheet.create({
     },
     logoContainer: {
         marginRight: theme.spacing.md,
+    },
+    iconContainer: {
+        position: 'relative',
+        padding: 8,
+    },
+    badge: {
+        position: 'absolute',
+        top: 2,
+        right: 2,
+        backgroundColor: 'red',
+        borderRadius: 10,
+        minWidth: 18,
+        height: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 4,
+    },
+    badgeText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold',
     },
 });

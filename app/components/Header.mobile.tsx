@@ -7,12 +7,17 @@ import {
     StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../styles/theme';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
+//theme & stores
+import { theme } from '../../styles/theme';
+import { useCartStore } from '@/stores/cartStore';
 
 export default function HeaderMobile() {
+    //expo router thingy
     const router = useRouter();
+    //Used for cart
+    const total = useCartStore((state) => state.getTotalQuantity());
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -39,13 +44,22 @@ export default function HeaderMobile() {
                             color={theme.colors.primary}
                         />
                     </TouchableOpacity>
-                    <TouchableOpacity>
-                        <Ionicons
-                            name="cart-outline"
-                            size={22}
-                            color={theme.colors.primary}
-                            style={{ marginLeft: 16 }}
-                        />
+                    <TouchableOpacity onPress={() => router.push('/cart')}>
+                        <View style={styles.iconContainer}>
+                            <Ionicons
+                                name="cart-outline"
+                                size={24}
+                                color={theme.colors.primary}
+                                style={{ marginLeft: 16 }}
+                            />
+                            {total > 0 && (
+                                <View style={styles.badge}>
+                                    <Text style={styles.badgeText}>
+                                        {total}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -54,7 +68,8 @@ export default function HeaderMobile() {
 }
 const styles = StyleSheet.create({
     container: {
-        padding: theme.spacing.md,
+        paddingVertical: theme.spacing.sm,
+        paddingHorizontal: theme.spacing.md,
         backgroundColor: theme.colors.background,
         flexDirection: 'row',
         alignItems: 'center',
@@ -72,8 +87,30 @@ const styles = StyleSheet.create({
     icons: {
         flexDirection: 'row',
         alignItems: 'center',
+        gap: theme.spacing.md,
     },
     safeArea: {
         backgroundColor: theme.colors.background,
+    },
+    iconContainer: {
+        position: 'relative',
+        padding: 4,
+    },
+    badge: {
+        position: 'absolute',
+        top: -2,
+        right: -2,
+        backgroundColor: 'red',
+        borderRadius: 10,
+        minWidth: 16,
+        height: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 4,
+    },
+    badgeText: {
+        color: 'white',
+        fontSize: 10,
+        fontWeight: 'bold',
     },
 });
