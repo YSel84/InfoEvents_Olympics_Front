@@ -1,8 +1,14 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
-import { useState } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    Platform,
+    ActivityIndicator,
+} from 'react-native';
+import { useEffect, useState } from 'react';
 //Datas & style
-import { events } from '../../mock/event';
 import { theme } from '../../styles/theme';
 import { useCartStore } from '@/stores/cartStore';
 import { useOfferStore } from '@/stores/offerStore';
@@ -11,40 +17,40 @@ import MainButton from '../components/MainButton';
 import WebWrapper from '../components/WebWrapper';
 import TicketOfferModal from '../components/TicketOffersModal';
 import WebOfferDrawer from '../components/WebOfferDrawer';
+import ScrollContainer from '../components/ScrollContainer';
+//API
+import { fetchEventById, Event } from '../lib/eventService';
 
 export default function EventDetail() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
+
+    //Error & loading stuff
+    const [event, setEvent] = useState<Event | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
     //Modal&Drawer
     const [showOfferPanel, setShowOfferPanel] = useState(false);
 
-    const event = events.find((e) => e.id === id);
     //Offer & cart store
     const { quantities, reset } = useOfferStore();
     const { addToCart } = useCartStore();
 
     //No event available
-    if (!event) {
-        return (
-            <WebWrapper>
-                <View
-                    style={[
-                        styles.container,
-                        { backgroundColor: theme.colors.page },
-                    ]}
-                >
-                    <Text style={{ color: theme.colors.text }}>
-                        Evènement introuvable
-                    </Text>
-                </View>
-            </WebWrapper>
-        );
-    }
+    useEffect(() => {
+        if (typeof id === 'string') {
+            fetchEventById(id)
+                .then(setEvent)
+                .catch(() => setError('Evénement introuvable'))
+                .finally(() => setLoading(false));
+        }
+    }, [id]);
 
     const handleValidate = () => {
         (['Solo', 'Duo', 'Familiale'] as const).forEach((offerType) => {
             const quantity = quantities[offerType];
-            if (quantity > 0) {
+            if (quantity > 0 && event) {
                 addToCart({
                     eventId: id as string,
                     eventTitle: event.title,
@@ -53,10 +59,9 @@ export default function EventDetail() {
                 });
             }
         });
+        reset();
+        setShowOfferPanel(false);
     };
-
-    reset();
-    setShowOfferPanel(false);
 
     //If web drawer
     const drawerOffset =
@@ -71,20 +76,37 @@ export default function EventDetail() {
                     contentContainerStyle={styles.container}
                     style={{ backgroundColor: theme.colors.page }}
                 >
-                    <Text style={styles.title}>{event.title}</Text>
-                    <Text style={styles.subtitle}>{event.location}</Text>
-                    <Text style={styles.subtitle}>{event.time}</Text>
-                    <Text style={styles.description}>{event.description}</Text>
-                    <View style={styles.buttonGroup}>
-                        <MainButton
-                            label="Choisir des billets"
-                            onPress={() => setShowOfferPanel(true)}
+                    {loading ? (
+                        <ActivityIndicator
+                            size="large"
+                            color={theme.colors.primary}
                         />
-                        <MainButton
-                            label="Fermer"
-                            onPress={() => router.back()}
-                        />
-                    </View>
+                    ) : error || !event ? (
+                        <Text style={{ color: 'red' }}>
+                            {error || 'Evénement introuvable'}
+                        </Text>
+                    ) : (
+                        <>
+                            <Text style={styles.title}>{event.title}</Text>
+                            <Text style={styles.subtitle}>
+                                {event.location}
+                            </Text>
+                            <Text style={styles.subtitle}>{event.date}</Text>
+                            <Text style={styles.description}>
+                                {event.description}
+                            </Text>
+                            <View style={styles.buttonGroup}>
+                                <MainButton
+                                    label="Choisir des billets"
+                                    onPress={() => setShowOfferPanel(true)}
+                                />
+                                <MainButton
+                                    label="Fermer"
+                                    onPress={() => router.back()}
+                                />
+                            </View>
+                        </>
+                    )}
                 </ScrollView>
             </View>
 
@@ -116,6 +138,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: theme.spacing.md,
         backgroundColor: theme.colors.page,
+        minHeight: 400,
     },
     title: {
         fontSize: 24,

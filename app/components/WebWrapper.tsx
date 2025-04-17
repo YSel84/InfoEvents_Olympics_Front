@@ -17,13 +17,21 @@ export default function WebWrapper({
     if (Platform.OS !== 'web') return <>{children}</>;
 
     let maxWidth: DimensionValue = '100%';
-    if (width >= 1200) maxWidth = 1200;
+    if (width >= 1400) maxWidth = 1400;
+    else if (width >= 1200) maxWidth = 1080;
     else if (width >= 992) maxWidth = 900;
     else if (width >= 768) maxWidth = '90%';
 
     return (
         <View style={styles.outerMargin}>
-            <View style={[styles.innerContent, { maxWidth }]}>{children}</View>
+            <View
+                style={[
+                    styles.innerContent,
+                    { maxWidth, minHeight: '100vh' as any },
+                ]}
+            >
+                {children}
+            </View>
         </View>
     );
 }
@@ -39,6 +47,5 @@ const styles = StyleSheet.create({
         width: '100%',
         maxWidth: 1200,
         backgroundColor: theme.colors.page,
-        minHeight: '100%',
     },
 });

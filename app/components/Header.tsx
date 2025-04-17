@@ -3,7 +3,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../styles/theme';
 import { Image } from 'expo-image';
-import { useCartStore } from '@/stores/cartStore';
+import { useCartStore } from '../../stores/cartStore';
+import Badge from './Badge';
 
 export default function HeaderWeb() {
     const router = useRouter();
@@ -43,18 +44,16 @@ export default function HeaderWeb() {
                 <TouchableOpacity onPress={() => router.push('/login')}>
                     <Text style={styles.navItem}>Se connecter</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => router.push('/cart')}>
+                <TouchableOpacity
+                    onPress={() => router.push({ pathname: '/cart' })}
+                >
                     <View style={styles.iconContainer}>
                         <Ionicons
                             name="cart-outline"
                             size={24}
                             color={theme.colors.primary}
                         />
-                        {total > 0 && (
-                            <View style={styles.badge}>
-                                <Text style={styles.badgeText}>{total}</Text>
-                            </View>
-                        )}
+                        <Badge value={total} />
                     </View>
                 </TouchableOpacity>
             </View>
@@ -72,7 +71,6 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         paddingVertical: theme.spacing.sm,
         paddingHorizontal: theme.spacing.md,
-        borderBottomWidth: 1,
     },
     leftSection: {
         flexDirection: 'row',
@@ -121,22 +119,5 @@ const styles = StyleSheet.create({
     iconContainer: {
         position: 'relative',
         padding: 8,
-    },
-    badge: {
-        position: 'absolute',
-        top: 2,
-        right: 2,
-        backgroundColor: 'red',
-        borderRadius: 10,
-        minWidth: 18,
-        height: 18,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 4,
-    },
-    badgeText: {
-        color: 'white',
-        fontSize: 12,
-        fontWeight: 'bold',
     },
 });

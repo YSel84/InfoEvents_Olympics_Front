@@ -13,6 +13,8 @@ import { Image } from 'expo-image';
 import { theme } from '../../styles/theme';
 import { useCartStore } from '@/stores/cartStore';
 
+import Badge from './Badge';
+
 export default function HeaderMobile() {
     //expo router thingy
     const router = useRouter();
@@ -52,13 +54,7 @@ export default function HeaderMobile() {
                                 color={theme.colors.primary}
                                 style={{ marginLeft: 16 }}
                             />
-                            {total > 0 && (
-                                <View style={styles.badge}>
-                                    <Text style={styles.badgeText}>
-                                        {total}
-                                    </Text>
-                                </View>
-                            )}
+                            <Badge value={total} />
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -95,22 +91,5 @@ const styles = StyleSheet.create({
     iconContainer: {
         position: 'relative',
         padding: 4,
-    },
-    badge: {
-        position: 'absolute',
-        top: -2,
-        right: -2,
-        backgroundColor: 'red',
-        borderRadius: 10,
-        minWidth: 16,
-        height: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 4,
-    },
-    badgeText: {
-        color: 'white',
-        fontSize: 10,
-        fontWeight: 'bold',
     },
 });
