@@ -34,7 +34,7 @@ export default function Card({ id, title, imageSource }: Props) {
 const styles = StyleSheet.create({
     card: {
         width: Platform.OS === 'web' ? '32%' : '90%',
-        aspectRatio: 3/3,
+        aspectRatio: 3 / 3,
         backgroundColor: theme.colors.background,
         borderRadius: theme.borderRadius,
         marginBottom: theme.spacing.md,
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     },
     cardImage: {
         width: '100%',
-        flex:1,
+        flex: 1,
     },
     cardTitle: {
         fontSize: 18,

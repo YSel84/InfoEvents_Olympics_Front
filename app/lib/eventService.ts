@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
 export type Event = {
     id: string;
@@ -10,13 +11,12 @@ export type Event = {
     featured: boolean;
 };
 
-const API_BASE_URL =
-    Platform.OS === 'web'
-        ? 'http://localhost:8080'
-        : 'http://192.168.1.123:8080'; // API sprint boot local
+const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
+
+console.log('API Base Url:', API_BASE_URL);
 
 export async function fetchEvents(): Promise<Event[]> {
-    const res = await fetch(`${API_BASE_URL}/api/events`);
+    const res = await fetch(`${API_BASE_URL}/events`);
 
     if (!res.ok) {
         throw new Error('Erreur lors du chargement des événements');
@@ -25,7 +25,7 @@ export async function fetchEvents(): Promise<Event[]> {
     return res.json();
 }
 export async function fetchEventById(id: string): Promise<Event> {
-    const res = await fetch(`${API_BASE_URL}/api/events/${id}`);
+    const res = await fetch(`${API_BASE_URL}/events/${id}`);
 
     if (!res.ok) {
         throw new Error('Evénement introuvable');
