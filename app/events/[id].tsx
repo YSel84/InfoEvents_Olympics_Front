@@ -19,7 +19,7 @@ import TicketOfferModal from '../components/TicketOffersModal';
 import WebOfferDrawer from '../components/WebOfferDrawer';
 import ScrollContainer from '../components/ScrollContainer';
 //API
-import { fetchEventById, Event } from '../lib/eventService';
+import { fetchEventById, Event } from '../lib/_eventService';
 
 export default function EventDetail() {
     const { id } = useLocalSearchParams();

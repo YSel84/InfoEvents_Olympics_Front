@@ -17,7 +17,7 @@ import ScrollContainer from './components/ScrollContainer';
 import { theme } from '../styles/theme';
 
 //API
-import { fetchEvents, Event } from './lib/eventService';
+import { fetchEvents, Event } from './lib/_eventService';
 
 export default function Index() {
     //layout
