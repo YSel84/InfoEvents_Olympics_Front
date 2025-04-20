@@ -15,10 +15,6 @@ const FRONT_PASSWORD = process.env.EXPO_PUBLIC_FRONT_PASSWORD!;
 
 const basicAuthHeader = 'Basic ' + btoa(`${FRONT_USERNAME}:${FRONT_PASSWORD}`);
 
-console.log('⛳️ RAW env:', process.env);
-console.log('📡 API URL:', process.env.EXPO_PUBLIC_API_BASE_URL);
-console.log('Resolved API Base Url:', API_BASE_URL);
-
 export async function fetchEvents(): Promise<Event[]> {
     if (!API_BASE_URL) {
         throw new Error("'API_BASE_URL non défini- vérifier .env et config");
