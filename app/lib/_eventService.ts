@@ -19,7 +19,6 @@ export async function fetchEvents(): Promise<Event[]> {
     if (!API_BASE_URL) {
         throw new Error("'API_BASE_URL non défini- vérifier .env et config");
     }
-    console.log('Auth header:', basicAuthHeader);
     const res = await fetch(`${API_BASE_URL}/events`, {
         headers: {
             Authorization: basicAuthHeader,
