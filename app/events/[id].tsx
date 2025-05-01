@@ -19,7 +19,7 @@ import TicketOfferModal from '../components/TicketOffersModal';
 import WebOfferDrawer from '../components/WebOfferDrawer';
 import ScrollContainer from '../components/ScrollContainer';
 //API
-import { fetchEventById, Event } from '../lib/eventService';
+import { fetchEventById, Event } from '../lib/_eventService';
 
 export default function EventDetail() {
     const { id } = useLocalSearchParams();
@@ -74,7 +74,7 @@ export default function EventDetail() {
             <View style={[styles.slideContainer, drawerOffset]}>
                 <ScrollView
                     contentContainerStyle={styles.container}
-                    style={{ backgroundColor: theme.colors.page }}
+                    style={{ backgroundColor: theme.colors.surface }}
                 >
                     {loading ? (
                         <ActivityIndicator
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
         padding: theme.spacing.lg,
         alignItems: 'center',
         gap: theme.spacing.md,
-        backgroundColor: theme.colors.page,
+        backgroundColor: theme.colors.surface,
         minHeight: 400,
     },
     title: {

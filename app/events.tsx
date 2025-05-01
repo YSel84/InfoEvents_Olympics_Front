@@ -12,7 +12,7 @@ import { theme } from '../styles/theme';
 
 //API
 import { useEffect, useState } from 'react';
-import { fetchEvents, Event } from './lib/eventService';
+import { fetchEvents, Event } from './lib/_eventService';
 
 export default function EventScreen() {
     const { visibleCount, increaseVisibleCount } = useEventStore();

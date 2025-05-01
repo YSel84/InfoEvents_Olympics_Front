@@ -17,7 +17,7 @@ import ScrollContainer from './components/ScrollContainer';
 import { theme } from '../styles/theme';
 
 //API
-import { fetchEvents, Event } from './lib/eventService';
+import { fetchEvents, Event } from './lib/_eventService';
 
 export default function Index() {
     //layout
@@ -37,7 +37,7 @@ export default function Index() {
     }, []);
 
     return (
-        <ScrollContainer>
+        <ScrollContainer style={{ backgroundColor: theme.colors.page }}>
             <WebWrapper>
                 <View style={[styles.heroSection, { height }]}>
                     <Image
@@ -89,6 +89,7 @@ const styles = StyleSheet.create({
     featured: {
         paddingVertical: theme.spacing.lg,
         paddingHorizontal: theme.spacing.md,
+        backgroundColor: theme.colors.surface,
     },
     featuredTitle: {
         fontSize: 22,

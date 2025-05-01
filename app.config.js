@@ -18,5 +18,11 @@ export default {
                 },
             },
         ],
+        [
+            'expo-secure-store',
+            {
+                configureAndroidBackup: true,
+            },
+        ],
     ],
 };
