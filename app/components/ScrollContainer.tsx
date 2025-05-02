@@ -38,6 +38,5 @@ const styles = StyleSheet.create({
         paddingBottom: 100,
         flexGrow: 1,
         backgroundColor: theme.colors.page,
-
     },
 });

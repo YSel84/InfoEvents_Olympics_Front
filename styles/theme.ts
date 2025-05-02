@@ -9,7 +9,7 @@ export const theme = {
         buttonBackground: '#d9c47c',
         buttonText: '#1a1a1a',
         border: '#444444',
-        danger: 'e53935',
+        danger: '#e53935',
     },
     borderRadius: 10,
     spacing: {
