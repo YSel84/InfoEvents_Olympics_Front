@@ -1,4 +1,6 @@
 import { encode as btoa } from 'base-64';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
 export type Event = {
     id: string;
@@ -9,9 +11,26 @@ export type Event = {
     image_url: string;
     featured: boolean;
 };
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL!;
-const FRONT_USERNAME = process.env.EXPO_PUBLIC_FRONT_USERNAME!;
-const FRONT_PASSWORD = process.env.EXPO_PUBLIC_FRONT_PASSWORD!;
+
+const extra = (Constants.expoConfig?.extra || {}) as Record<string, string>;
+
+//EXPO_PUBLIC for communication with backend WEB version
+//Mobile : expo.extra
+
+const API_BASE_URL =
+    Platform.OS === 'web'
+        ? process.env.EXPO_PUBLIC_API_BASE_URL!
+        : extra.EXPO_PUBLIC_API_BASE_URL!;
+
+const FRONT_USERNAME =
+    Platform.OS === 'web'
+        ? process.env.EXPO_PUBLIC_FRONT_USERNAME!
+        : extra.FRONT_USERNAME!;
+
+const FRONT_PASSWORD =
+    Platform.OS === 'web'
+        ? process.env.EXPO_PUBLIC_FRONT_PASSWORD
+        : extra.FRONT_PASSWORD;
 
 const basicAuthHeader = 'Basic ' + btoa(`${FRONT_USERNAME}:${FRONT_PASSWORD}`);
 
