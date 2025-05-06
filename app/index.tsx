@@ -7,11 +7,13 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 
 //components
-import Card from './components/Card';
+import Card from './components/ui/Card';
 import WebWrapper from './components/WebWrapper';
 import ScrollContainer from './components/ScrollContainer';
+import MainButton from './components/ui/MainButton';
 
 //Styles & Data
 import { theme } from '../styles/theme';
@@ -20,6 +22,7 @@ import { theme } from '../styles/theme';
 import { fetchEvents, Event } from './lib/_eventService';
 
 export default function Index() {
+    const router = useRouter();
     //layout
     const { width } = useWindowDimensions();
     const height = width > 1024 ? 320 : width > 768 ? 280 : 220;
@@ -66,10 +69,20 @@ export default function Index() {
                                 .map((e) => (
                                     <Card
                                         key={e.id}
-                                        id={e.id}
                                         title={e.title}
-                                        imageSource={{ uri: e.image_url }}
-                                    />
+                                        event_datetime={e.event_datetime}
+                                        location={e.location}
+                                        image_url={e.image_url}
+                                    >
+                                        <MainButton
+                                            label="Informations et billets"
+                                            onPress={() =>
+                                                router.push(
+                                                    `/events/${e.id}` as any,
+                                                )
+                                            }
+                                        />
+                                    </Card>
                                 ))}
                         </View>
                     )}

@@ -15,7 +15,7 @@ import { useState, useEffect } from 'react';
 
 import { useAuthStore } from '../stores/authStore';
 
-import MainButton from './components/MainButton';
+import MainButton from './components/ui/MainButton';
 import { DatePickerField } from './components/DatePicker';
 import { theme } from '../styles/theme';
 

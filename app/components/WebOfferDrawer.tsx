@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 
 import { theme } from '../../styles/theme';
-import MainButton from './MainButton';
+import MainButton from './ui/MainButton';
 
 import { useOfferStore } from '@/stores/offerStore';
 

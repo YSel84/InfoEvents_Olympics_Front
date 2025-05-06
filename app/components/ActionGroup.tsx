@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ViewStyle, StyleSheet } from 'react-native';
 import { theme } from '../../styles/theme';
-import MainButton, { ButtonSize } from './MainButton';
+import MainButton, { ButtonSize } from './ui/MainButton';
 
 type Action = {
     label: string;

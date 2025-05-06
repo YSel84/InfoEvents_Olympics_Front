@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import MainButton from '../components/MainButton';
+import MainButton from '../components/ui/MainButton';
 import WebWrapper from '../components/WebWrapper';
 
 import { useAuthStore } from '../../stores/authStore';

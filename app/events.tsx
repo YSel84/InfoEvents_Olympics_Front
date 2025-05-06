@@ -1,11 +1,16 @@
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import Toast from 'react-native-toast-message';
-
+import {
+    View,
+    Text,
+    StyleSheet,
+    ActivityIndicator,
+    FlatList,
+} from 'react-native';
+import { useRouter } from 'expo-router';
 //Components
-import Card from './components/Card';
+import Card from './components/ui/Card';
 import WebWrapper from './components/WebWrapper';
 import ScrollContainer from './components/ScrollContainer';
-import MainButton from './components/MainButton';
+import MainButton from './components/ui/MainButton';
 //Theme & store
 import { useEventStore } from '../stores/eventStore';
 import { theme } from '../styles/theme';
@@ -15,6 +20,7 @@ import { useEffect, useState } from 'react';
 import { fetchEvents, Event } from './lib/_eventService';
 
 export default function EventScreen() {
+    const router = useRouter();
     const { visibleCount, increaseVisibleCount } = useEventStore();
     const [events, setEvents] = useState<Event[]>([]);
 
@@ -36,58 +42,78 @@ export default function EventScreen() {
     const handleLoadMore = () => {
         if (hasMore) {
             increaseVisibleCount();
-        } else {
-            Toast.show({
-                type: 'info',
-                text1: 'Tous les événements disponibles sont affichés',
-            });
         }
     };
+
+    if (loading) {
+        return (
+            <View style={styles.center}>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
+            </View>
+        );
+    }
+
+    if (error) {
+        return (
+            <View style={styles.center}>
+                <Text style={styles.errorText}>{error}</Text>
+            </View>
+        );
+    }
 
     return (
         <ScrollContainer>
             <WebWrapper>
-                <Text style={styles.title}>Les événements</Text>
+                <Text style={styles.title}>Les épreuves</Text>
                 <Text style={styles.text}>
                     Découvrez les événéments disponibles
                 </Text>
-                {loading ? (
-                    <ActivityIndicator
-                        size="large"
-                        color={theme.colors.primary}
-                    />
-                ) : error ? (
-                    <Text style={{ color: 'red', textAlign: 'center' }}>
-                        {error}
-                    </Text>
-                ) : (
-                    <>
-                        <View style={styles.grid}>
-                            {visibleEvents.map((event) => (
-                                <Card
-                                    key={event.id}
-                                    id={event.id}
-                                    title={event.title}
-                                    imageSource={{ uri: event.image_url }}
-                                />
-                            ))}
-                        </View>
-                        <View style={styles.loadMore}>
+                <FlatList
+                    data={visibleEvents}
+                    numColumns={3}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <Card
+                            title={item.title}
+                            event_datetime={item.event_datetime}
+                            location={item.location}
+                            image_url={item.image_url}
+                        >
                             <MainButton
-                                label="Charger plus d'événements"
+                                label="Informations et billets"
+                                onPress={() =>
+                                    router.push(`/events/${item.id}` as any)
+                                }
+                            />
+                        </Card>
+                    )}
+                    ListFooterComponent={() =>
+                        hasMore ? (
+                            <MainButton
+                                label="Charger plus d'épreuves"
                                 onPress={handleLoadMore}
                             />
-                        </View>
-                    </>
-                )}
-
-                <Toast />
+                        ) : (
+                            <Text style={styles.footerText}>
+                                Il n'y a plus d'événements à afficher
+                            </Text>
+                        )
+                    }
+                />
             </WebWrapper>
         </ScrollContainer>
     );
 }
 
 const styles = StyleSheet.create({
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    errorText: {
+        color: theme.colors.danger,
+    },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
@@ -102,16 +128,13 @@ const styles = StyleSheet.create({
         marginBottom: theme.spacing.lg,
         color: theme.colors.primary,
     },
-    grid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        gap: theme.spacing.md,
-        rowGap: theme.spacing.lg,
+    location: {
+        fontSize: 14,
+        marginBottom: 8,
     },
-    loadMore: {
-        marginTop: theme.spacing.lg,
-        marginBottom: theme.spacing.lg,
-        alignItems: 'center',
+    footerText: {
+        textAlign: 'center',
+        padding: 16,
+        color: theme.colors.secondaryText,
     },
 });

@@ -21,7 +21,7 @@ import { theme } from '../styles/theme';
 
 //Components
 import WebWrapper from './components/WebWrapper';
-import MainButton from './components/MainButton';
+import MainButton from './components/ui/MainButton';
 
 export default function LoginPage() {
     const router = useRouter();

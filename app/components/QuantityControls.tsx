@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { baseText } from '../../styles/common';
 import { theme } from '../../styles/theme';
-import MainButton from './MainButton';
+import MainButton from './ui/MainButton';
 
 type Props = {
     quantity: number;

@@ -4,7 +4,7 @@ import HeaderWeb from './components/Header';
 import Footer from './components/Footer';
 import TabBar from './components/TabBar';
 import HeaderMobile from './components/Header.mobile';
-import Toast from 'react-native-toast-message';
+
 import { useAuthStore } from '../stores/authStore';
 import { useEffect, useState } from 'react';
 import { theme } from '../styles/theme';
@@ -36,7 +36,6 @@ export default function RootLayout() {
             {Platform.OS === 'web' ? <HeaderWeb /> : <HeaderMobile />}
             <View style={{ flex: 1 }}>
                 <Slot />
-                <Toast />
             </View>
             {Platform.OS === 'web' ? <Footer /> : <TabBar />}
         </View>

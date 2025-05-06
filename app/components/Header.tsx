@@ -18,7 +18,7 @@ import { useCartStore } from '../../stores/cartStore';
 import Badge from './Badge';
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
-import MainButton from './MainButton';
+import MainButton from './ui/MainButton';
 
 export default function HeaderWeb() {
     const router = useRouter();

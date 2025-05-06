@@ -13,7 +13,7 @@ import { theme } from '../../styles/theme';
 import { useCartStore } from '@/stores/cartStore';
 import { useOfferStore } from '@/stores/offerStore';
 //components
-import MainButton from '../components/MainButton';
+import MainButton from '../components/ui/MainButton';
 import WebWrapper from '../components/WebWrapper';
 import TicketOfferModal from '../components/TicketOffersModal';
 import WebOfferDrawer from '../components/WebOfferDrawer';
@@ -91,7 +91,9 @@ export default function EventDetail() {
                             <Text style={styles.subtitle}>
                                 {event.location}
                             </Text>
-                            <Text style={styles.subtitle}>{event.date}</Text>
+                            <Text style={styles.subtitle}>
+                                {event.event_datetime}
+                            </Text>
                             <Text style={styles.description}>
                                 {event.description}
                             </Text>

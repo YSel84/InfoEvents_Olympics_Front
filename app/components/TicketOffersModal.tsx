@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 //Components
-import MainButton from './MainButton';
+import MainButton from './ui/MainButton';
 import Modal from 'react-native-modal';
 
 //Data, theme & store

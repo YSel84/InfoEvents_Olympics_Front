@@ -12,7 +12,7 @@ import { cardStyle } from '../styles/common';
 
 //Components
 import WebWrapper from './components/WebWrapper';
-import MainButton from './components/MainButton';
+import MainButton from './components/ui/MainButton';
 import QuantityControls from './components/QuantityControls';
 import ActionGroup from './components/ActionGroup';
 
