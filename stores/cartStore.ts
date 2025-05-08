@@ -1,11 +1,11 @@
 import { create } from 'zustand';
-import { OfferType, OFFER_DEFINITIONS } from './offerStore';
+import { useOfferStore } from './offerStore';
 
 export type CartItem = {
     id: string;
     eventId: string;
     eventTitle: string;
-    offerType: OfferType;
+    offerId: string;
     quantity: number;
 };
 
@@ -14,7 +14,7 @@ type CartStore = {
     addToCart: (item: {
         eventId: string;
         eventTitle: string;
-        offerType: OfferType;
+        offerId: string;
         quantity: number;
     }) => void;
     updateCart: (itemId: string, quantity: number) => void;
@@ -27,8 +27,8 @@ type CartStore = {
 export const useCartStore = create<CartStore>((set, get) => ({
     cartItems: [],
 
-    addToCart: ({ eventId, eventTitle, offerType, quantity }) => {
-        const id = `${eventId}_${offerType}`;
+    addToCart: ({ eventId, eventTitle, offerId, quantity }) => {
+        const id = `${eventId}_${offerId}`;
         const existing = get().cartItems.find((item) => item.id === id);
 
         if (existing) {
@@ -46,7 +46,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
                 id,
                 eventId,
                 eventTitle,
-                offerType,
+                offerId,
                 quantity,
             };
             set((state) => ({
@@ -80,9 +80,12 @@ export const useCartStore = create<CartStore>((set, get) => ({
     getTotalQuantity: () =>
         get().cartItems.reduce((sum, item) => sum + item.quantity, 0),
 
-    getTotalPrice: () =>
-        get().cartItems.reduce((sum, item) => {
-            const price = OFFER_DEFINITIONS[item.offerType].price;
+    getTotalPrice: () => {
+        const { offers } = useOfferStore.getState();
+        return get().cartItems.reduce((sum, item) => {
+            const offer = offers.find((o) => o.offerId === item.offerId);
+            const price = offer ? offer.price : 0;
             return sum + price * item.quantity;
-        }, 0),
+        }, 0);
+    },
 }));

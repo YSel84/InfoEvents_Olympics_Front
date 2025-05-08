@@ -1,27 +1,32 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 
-//stores
+// stores
 import { useCartStore } from '@/stores/cartStore';
-import { OFFER_DEFINITIONS } from '@/stores/offerStore';
+import { useOfferStore } from '@/stores/offerStore';
 
-//Style
+// Style & components
 import { theme } from '../styles/theme';
-import { cardStyle } from '../styles/common';
-
-//Components
 import WebWrapper from './components/WebWrapper';
 import MainButton from './components/ui/MainButton';
-import QuantityControls from './components/QuantityControls';
-import ActionGroup from './components/ActionGroup';
+import QuantityControls from './components/ui/QuantityControls';
+import ActionGroup from './components/ui/ActionGroup';
 
 export default function CartScreen() {
-    //Cart store constants
-    const { cartItems, updateCart, removeItem, getTotalPrice } = useCartStore();
-
-    //expo thingy
     const router = useRouter();
+
+    // Cart and offers stores
+    const { cartItems, updateCart, removeItem, getTotalPrice } = useCartStore();
+    const { offers, fetchOffers } = useOfferStore();
+
+    // Load offers data for all events in cart
+    useEffect(() => {
+        const eventIds = Array.from(
+            new Set(cartItems.map((item) => item.eventId)),
+        );
+        eventIds.forEach((id) => fetchOffers(id));
+    }, [cartItems, fetchOffers]);
 
     return (
         <WebWrapper>
@@ -31,54 +36,68 @@ export default function CartScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 <Text style={styles.title}>Votre panier</Text>
+
                 {cartItems.length === 0 ? (
                     <Text style={styles.empty}>Votre panier est vide.</Text>
                 ) : (
                     <>
                         {cartItems.map((item) => {
-                            const offer = OFFER_DEFINITIONS[item.offerType];
-                            const totalLine = (
-                                offer.price * item.quantity
-                            ).toFixed(2);
+                            // Lookup offer details
+                            const offer = offers.find(
+                                (o) => o.offerId === item.offerId,
+                            );
+                            const label = offer?.name ?? '';
+                            const price = offer?.price ?? 0;
+                            const totalLine = (price * item.quantity).toFixed(
+                                2,
+                            );
 
                             return (
                                 <View key={item.id} style={styles.item}>
-                                    <View style={styles.row}>
-                                        <Text style={styles.label}>
-                                            Votre événement: {item.eventTitle}
+                                    {/* Info Column */}
+                                    <View style={styles.infoColumn}>
+                                        <Text style={styles.eventTitle}>
+                                            {item.eventTitle}
                                         </Text>
-                                        <Text style={styles.label}>
-                                            Offre choisie : {offer.label}
+                                        <Text style={styles.offerLabel}>
+                                            {label}
                                         </Text>
                                     </View>
-                                    <View style={styles.row}>
+                                    {/* Actions Column */}
+                                    <View style={styles.actionColumn}>
+                                        <Text style={styles.quantityLabel}>
+                                            Quantité
+                                        </Text>
                                         <QuantityControls
                                             quantity={item.quantity}
                                             onChange={(q) =>
                                                 updateCart(item.id, q)
                                             }
                                         />
-                                        <Text style={styles.price}>
+                                        <Text style={styles.linePrice}>
                                             {totalLine} €
                                         </Text>
+                                        <MainButton
+                                            label="Supprimer"
+                                            onPress={() => removeItem(item.id)}
+                                            size="small"
+                                            style={styles.removeBtn}
+                                        />
                                     </View>
-                                    <MainButton
-                                        label="supprimer"
-                                        onPress={() => removeItem(item.id)}
-                                        style={styles.removeBtn}
-                                    ></MainButton>
                                 </View>
                             );
                         })}
+
                         <Text style={styles.total}>
-                            Total : {getTotalPrice().toFixed(2)}€
+                            Total : {getTotalPrice().toFixed(2)} €
                         </Text>
+
                         <ActionGroup
                             actions={[
                                 {
                                     label: 'Valider le panier et passer au paiement',
                                     onPress: () => {
-                                        /*checkout*/
+                                        // checkout logic
                                     },
                                     size: 'large',
                                 },
@@ -113,25 +132,46 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     item: {
-        ...cardStyle,
-    },
-    row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: theme.spacing.sm,
+        backgroundColor: theme.colors.surface,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        borderRadius: theme.borderRadius,
+        padding: theme.spacing.md,
+        marginBottom: theme.spacing.lg,
     },
-    label: {
-        fontSize: 16,
-        color: theme.colors.text,
+    infoColumn: {
+        flex: 1,
+        paddingRight: theme.spacing.sm,
     },
-    price: {
+    eventTitle: {
         fontSize: 16,
         fontWeight: 'bold',
         color: theme.colors.primary,
+        marginBottom: theme.spacing.xs,
+    },
+    offerLabel: {
+        fontSize: 14,
+        color: theme.colors.text,
+    },
+    actionColumn: {
+        alignItems: 'flex-end',
+        justifyContent: 'space-between',
+    },
+    quantityLabel: {
+        fontSize: 12,
+        color: theme.colors.secondaryText,
+        marginBottom: theme.spacing.xs,
+    },
+    linePrice: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: theme.colors.primary,
+        marginVertical: theme.spacing.xs,
     },
     removeBtn: {
         marginTop: theme.spacing.sm,
-        alignSelf: 'flex-end',
     },
     total: {
         fontSize: 18,

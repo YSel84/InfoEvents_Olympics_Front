@@ -15,9 +15,17 @@ export type Event = {
     featured: boolean;
 };
 
-export type Offer = {
+/*export type RawOffer = {
     offer_id: string;
     event_id: string;
+    name: string;
+    price: number;
+    stock: number;
+};*/
+
+export type Offer = {
+    offerId: string;
+    eventId: string;
     name: string;
     price: number;
     stock: number;
@@ -32,8 +40,8 @@ export async function fetchEvents(): Promise<Event[]> {
         throw new Error('Erreur au chargement des événements');
     }
     const raw = (await res.json()) as any[];
-    console.log('fetchEvents raw:', raw);
-    const mapped: Event[] = raw.map((e) => ({
+
+    return raw.map((e) => ({
         id: e.id,
         title: e.title,
         location: e.location,
@@ -42,8 +50,6 @@ export async function fetchEvents(): Promise<Event[]> {
         image_url: e.imageUrl ?? e.image_url ?? '',
         featured: e.featured,
     }));
-    console.log('fetchEvents mapped:', mapped);
-    return mapped;
 }
 
 //Event by id for details
@@ -55,8 +61,8 @@ export async function fetchEventById(id: string): Promise<Event> {
         throw new Error('Evénement introuvable');
     }
     const e = (await res.json()) as any;
-    console.log('fetchEventById raw:', e);
-    const mapped: Event = {
+
+    return {
         id: e.id,
         title: e.title,
         location: e.location,
@@ -65,8 +71,6 @@ export async function fetchEventById(id: string): Promise<Event> {
         image_url: e.imageUrl ?? e.image_url ?? '',
         featured: e.featured,
     };
-    console.log('fetchEventById mapped:', mapped);
-    return mapped;
 }
 
 //offers by events
@@ -74,10 +78,15 @@ export async function fetchOffersByEvent(eventId: string): Promise<Offer[]> {
     const res = await fetchWithAuth(`/events/${eventId}/offers`, {
         method: 'GET',
     });
-    if (!res.ok) {
-        throw new Error('Erreur au chargement des offres');
-    }
-    const offers = (await res.json()) as Offer[];
-    console.log(`fetchOffersByEvent(${eventId}) raw:`, offers);
-    return offers;
+    if (!res.ok) throw new Error('Erreur au chargement des offres');
+
+    const raw = (await res.json()) as any[];
+
+    return raw.map((o) => ({
+        offerId: String(o.offerId),
+        eventId: String(o.eventId),
+        name: o.name,
+        price: o.price,
+        stock: o.stock ?? 0,
+    }));
 }

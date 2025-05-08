@@ -4,15 +4,16 @@
  */
 
 import React from 'react';
-import { Text } from 'react-native';
+import { Text, TextStyle, StyleSheet } from 'react-native';
 import { format, parseISO, isValid } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { theme } from '@/styles/theme';
 
 interface Props {
     value: string | Date;
+    style?: TextStyle;
 }
 export const FormattedDate: React.FC<Props> = ({ value }) => {
-    //debug log
-    console.log('FormattedDate received: ', value);
     //convert into date
     let date: Date;
     if (typeof value === 'string') {
@@ -24,16 +25,19 @@ export const FormattedDate: React.FC<Props> = ({ value }) => {
     } else {
         date = value;
     }
-    //logging de date
-    console.log('Parsed Date object: ', date, 'isValid: ', isValid(date));
 
     //check validity
     if (!isValid(date)) {
         return <Text style={{ color: '#666' }}>Date indisponible</Text>;
     }
-    const formatted = format(date, 'dd/MM/yyyy HH:mm');
-    console.log('Formatted date String: ', formatted);
-    return <Text>{formatted}</Text>;
+    const formatted = format(date, 'd MMMM yyyy HH:mm', { locale: fr });
+
+    return <Text style={styles.dateText}>{formatted}</Text>;
 };
 
-//placeholder in case of error
+const styles = StyleSheet.create({
+    dateText: {
+        color: theme.colors.text,
+        fontSize: 16,
+    },
+});

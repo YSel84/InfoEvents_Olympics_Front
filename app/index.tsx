@@ -17,15 +17,30 @@ import MainButton from './components/ui/MainButton';
 
 //Styles & Data
 import { theme } from '../styles/theme';
+import { gridContainer, gridItem } from '@/styles/common';
 
 //API
 import { fetchEvents, Event } from './lib/_eventService';
+import { useBreakpoint } from './hooks/useBreakpoints';
 
 export default function Index() {
     const router = useRouter();
+    const bp = useBreakpoint();
+
     //layout
     const { width } = useWindowDimensions();
-    const height = width > 1024 ? 320 : width > 768 ? 280 : 220;
+    //const height = width > 1024 ? 320 : width > 768 ? 280 : 220;
+    const height =
+        width > theme.layout.breakpoints.lg
+            ? 320
+            : width > theme.layout.breakpoints.md
+              ? 280
+              : 220;
+    //Grid item width
+    let itemWidth = '100%';
+    if (bp === 'md') itemWidth = '48%';
+    if (bp === 'lg' || bp === 'xl') itemWidth = '32%';
+
     //API stuff
     const [events, setEvents] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
@@ -40,8 +55,8 @@ export default function Index() {
     }, []);
 
     return (
-        <ScrollContainer style={{ backgroundColor: theme.colors.page }}>
-            <WebWrapper>
+        <WebWrapper>
+            <ScrollContainer>
                 <View style={[styles.heroSection, { height }]}>
                     <Image
                         source={require('../assets/images/hero-bg.jpg')}
@@ -63,32 +78,42 @@ export default function Index() {
                     ) : error ? (
                         <Text style={{ color: 'red' }}>{error}</Text>
                     ) : (
-                        <View style={styles.cardGrid}>
+                        <View style={gridContainer}>
                             {events
                                 .filter((e) => e.featured)
                                 .map((e) => (
-                                    <Card
+                                    <View
                                         key={e.id}
-                                        title={e.title}
-                                        event_datetime={e.event_datetime}
-                                        location={e.location}
-                                        image_url={e.image_url}
+                                        style={[
+                                            gridItem,
+                                            {
+                                                flexBasis: itemWidth,
+                                            } as import('react-native').ViewStyle,
+                                        ]}
                                     >
-                                        <MainButton
-                                            label="Informations et billets"
-                                            onPress={() =>
-                                                router.push(
-                                                    `/events/${e.id}` as any,
-                                                )
-                                            }
-                                        />
-                                    </Card>
+                                        <Card
+                                            //key={e.id}
+                                            title={e.title}
+                                            event_datetime={e.event_datetime}
+                                            location={e.location}
+                                            image_url={e.image_url}
+                                        >
+                                            <MainButton
+                                                label="Informations et billets"
+                                                onPress={() =>
+                                                    router.push(
+                                                        `/events/${e.id}` as any,
+                                                    )
+                                                }
+                                            />
+                                        </Card>
+                                    </View>
                                 ))}
                         </View>
                     )}
                 </View>
-            </WebWrapper>
-        </ScrollContainer>
+            </ScrollContainer>
+        </WebWrapper>
     );
 }
 
@@ -97,12 +122,13 @@ const styles = StyleSheet.create({
         width: '100%',
         position: 'relative',
         overflow: 'hidden',
+        backgroundColor: theme.colors.page,
     },
 
     featured: {
         paddingVertical: theme.spacing.lg,
         paddingHorizontal: theme.spacing.md,
-        backgroundColor: theme.colors.surface,
+        backgroundColor: theme.colors.page,
     },
     featuredTitle: {
         fontSize: 22,
@@ -110,12 +136,5 @@ const styles = StyleSheet.create({
         marginBottom: theme.spacing.md,
         textAlign: 'center',
         color: theme.colors.buttonBackground,
-    },
-    cardGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        gap: theme.spacing.md,
-        paddingHorizontal: theme.spacing.sm,
     },
 });

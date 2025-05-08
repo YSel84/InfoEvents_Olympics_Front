@@ -1,33 +1,43 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-
-//Components
-import MainButton from './ui/MainButton';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
 
-//Data, theme & store
+import MainButton from './ui/MainButton';
+import OfferRow from './ui/OfferRow';
 import { useOfferStore } from '@/stores/offerStore';
 import { theme } from '../../styles/theme';
 
-type Props = {
+interface Props {
+    eventId: string;
     isVisible: boolean;
     onClose: () => void;
     onValidate: () => void;
-};
+}
 
-const offers = ['Solo', 'Duo', 'Familiale'] as const;
-
-export default function TicketOfferModal({
+export default function TicketOffersModal({
+    eventId,
     isVisible,
     onClose,
     onValidate,
 }: Props) {
-    /*const [quantities, setQuantities] = useState<{ [key: string]: number }>({
-        Solo: 0,
-        Duo: 0,
-        Familiale: 0,
-    });*/
-    const { quantities, increment, decrement } = useOfferStore();
+    const {
+        offers, // le tableau dynamique de ton store
+        quantities, // record { [offer_id]: number }
+        fetchOffers, // charge `offers` & initialise `quantities`
+        resetQuantities, // remet à zéro toutes les clés dynamiques
+        increment,
+        decrement,
+    } = useOfferStore();
 
+    // À l’ouverture, on réinitialise et charge la bonne liste d’offres
+    useEffect(() => {
+        if (isVisible) {
+            resetQuantities();
+            fetchOffers(eventId);
+        }
+    }, [isVisible, eventId]);
+
+    console.log('Offers in modal:', offers);
     return (
         <Modal
             isVisible={isVisible}
@@ -36,28 +46,41 @@ export default function TicketOfferModal({
         >
             <View style={styles.container}>
                 <Text style={styles.title}>Offres disponibles</Text>
-                {offers.map((offer) => (
-                    <View key={offer} style={styles.offerRow}>
-                        <Text style={styles.offerName}>{offer}</Text>
-                        <View style={styles.controls}>
-                            <TouchableOpacity
-                                onPress={() => decrement(offer)}
-                                style={styles.controlButton}
-                            >
-                                <Text style={styles.controlText}>-</Text>
-                            </TouchableOpacity>
-                            <Text style={styles.quantity}>
-                                {quantities[offer]}
-                            </Text>
-                            <TouchableOpacity
-                                onPress={() => increment(offer)}
-                                style={styles.controlButton}
-                            >
-                                <Text style={styles.controlText}>+</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                ))}
+
+                {offers.length === 0 ? (
+                    <Text>Chargement…</Text>
+                ) : (
+                    offers.map((o) => {
+                        console.log(
+                            'Rendering row for',
+                            o.offerId,
+                            'qty:',
+                            quantities[o.offerId],
+                        );
+                        return (
+                            <OfferRow
+                                key={o.offerId}
+                                name={o.name}
+                                price={o.price}
+                                quantity={quantities[o.offerId]} // bon index
+                                onIncrement={() => {
+                                    console.log(
+                                        'increment modal for',
+                                        o.offerId,
+                                    );
+                                    increment(o.offerId);
+                                }}
+                                onDecrement={() => {
+                                    console.log(
+                                        'decrement modal for',
+                                        o.offerId,
+                                    );
+                                    decrement(o.offerId);
+                                }}
+                            />
+                        );
+                    })
+                )}
 
                 <View style={styles.actions}>
                     <MainButton
@@ -89,44 +112,10 @@ const styles = StyleSheet.create({
         color: theme.colors.text,
         textAlign: 'center',
     },
-    offerRow: {
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-        borderRadius: theme.borderRadius,
-        padding: theme.spacing.md,
-        marginBottom: theme.spacing.md,
-        backgroundColor: theme.colors.surface,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    offerName: {
-        fontSize: 16,
-        color: theme.colors.text,
-    },
-    controls: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: theme.spacing.sm,
-    },
-    controlButton: {
-        backgroundColor: theme.colors.primary,
-        borderRadius: 4,
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-    },
-    controlText: {
-        color: theme.colors.buttonText,
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    quantity: {
-        fontSize: 16,
-        color: theme.colors.text,
-        marginHorizontal: 8,
-    },
     actions: {
         marginTop: theme.spacing.lg,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         gap: theme.spacing.sm,
     },
 });

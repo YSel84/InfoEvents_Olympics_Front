@@ -21,6 +21,8 @@ export default function ScrollContainer({
 }: Props) {
     return (
         <ScrollView
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
             style={[styles.container, style]}
             contentContainerStyle={[styles.content, contentContainerStyle]}
         >
@@ -33,10 +35,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.colors.page,
+        width: '100%',
     },
     content: {
-        paddingBottom: 100,
-        flexGrow: 1,
+        paddingBottom: theme.spacing.lg,
         backgroundColor: theme.colors.page,
     },
 });

@@ -1,54 +1,73 @@
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Platform,
-} from 'react-native';
+/*import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 
 import { theme } from '../../styles/theme';
 import MainButton from './ui/MainButton';
+import OfferRow from './ui/OfferRow';
+
+//import { fetchOffersByEvent, Offer } from '../lib/_eventService';
 
 import { useOfferStore } from '@/stores/offerStore';
 
 type Props = {
+    eventId: string;
     isOpen: boolean;
     onClose: () => void;
     onValidate: () => void;
 };
 
-const offers = ['Solo', 'Duo', 'Familiale'] as const;
-
-export default function WebOfferDrawer({ isOpen, onClose, onValidate }: Props) {
+export default function WebOfferDrawer({
+    eventId,
+    isOpen,
+    onClose,
+    onValidate,
+}: Props) {
     const { quantities, increment, decrement } = useOfferStore();
+    
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (Platform.OS === 'web' && isOpen) {
+            setLoading(true);
+            fetchOffersByEvent(eventId)
+                .then((fetched) => {
+                    console.log('Offers in drawer fetched: ', fetched);
+                    setOffers(fetched);
+                })
+                .finally(() => setLoading(false));
+        }
+    }, [eventId, isOpen]);
+
+    console.log('Offers in drawer state:', offers);
 
     if (Platform.OS !== 'web' || !isOpen) return null;
 
     return (
         <View style={styles.drawer}>
-            <Text style={styles.title}>Choisissez vos billets</Text>
-
-            {offers.map((offer) => (
-                <View key={offer} style={styles.offerRow}>
-                    <Text style={styles.offerName}>{offer}</Text>
-                    <View style={styles.controls}>
-                        <TouchableOpacity
-                            onPress={() => decrement(offer)}
-                            style={styles.controlButton}
-                        >
-                            <Text style={styles.controlText}>-</Text>
-                        </TouchableOpacity>
-                        <Text style={styles.quantity}>{quantities[offer]}</Text>
-                        <TouchableOpacity
-                            onPress={() => increment(offer)}
-                            style={styles.controlButton}
-                        >
-                            {' '}
-                            <Text style={styles.controlText}>+</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            ))}
+            <Text style={styles.title}>Offres de billets disponibles</Text>
+            {loading ? (
+                <Text>Chargement des offres...</Text>
+            ) : (
+                offers.map((o) => {
+                    console.log('Rendering drawer row for', o.offerId);
+                    return (
+                        <OfferRow
+                            key={o.offerId}
+                            name={o.name}
+                            price={o.price}
+                            quantity={quantities[o.offer_id]}
+                            onIncrement={() => {
+                                console.log('increment drawer for', o.offer_id);
+                                increment(o.offerId);
+                            }}
+                            onDecrement={() => {
+                                console.log('decrement drawer for', o.offer_id);
+                                decrement(o.offerId);
+                            }}
+                        />
+                    );
+                })
+            )}
             <View style={styles.actions}>
                 <MainButton label="Valider" onPress={onValidate} />
                 <MainButton label="Fermer" onPress={onClose} />
@@ -66,7 +85,7 @@ const styles = StyleSheet.create({
         height: '100%',
         backgroundColor: theme.colors.page,
         padding: theme.spacing.lg,
-        borderLeftWidth: 11,
+        borderLeftWidth: 5,
         borderLeftColor: theme.colors.border,
         zIndex: 999,
     },
@@ -77,44 +96,112 @@ const styles = StyleSheet.create({
         color: theme.colors.text,
         textAlign: 'center',
     },
-    offerRow: {
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-        borderRadius: theme.borderRadius,
-        padding: theme.spacing.md,
-        marginBottom: theme.spacing.md,
-        backgroundColor: theme.colors.surface,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+
+    actions: {
+        marginTop: theme.spacing.lg,
+        gap: theme.spacing.sm,
     },
-    offerName: {
-        fontSize: 16,
-        color: theme.colors.text,
+});*/
+
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+
+import MainButton from './ui/MainButton';
+import OfferRow from './ui/OfferRow';
+import { useOfferStore } from '@/stores/offerStore';
+import { theme } from '../../styles/theme';
+
+interface Props {
+    eventId: string;
+    isOpen: boolean;
+    onClose: () => void;
+    onValidate: () => void;
+}
+
+export default function WebOfferDrawer({
+    eventId,
+    isOpen,
+    onClose,
+    onValidate,
+}: Props) {
+    const {
+        offers,
+        quantities,
+        fetchOffers,
+        resetQuantities,
+        increment,
+        decrement,
+    } = useOfferStore();
+
+    useEffect(() => {
+        if (Platform.OS === 'web' && isOpen) {
+            resetQuantities();
+            fetchOffers(eventId);
+        }
+    }, [eventId, isOpen]);
+
+    console.log('Offers in drawer state:', offers);
+
+    if (Platform.OS !== 'web' || !isOpen) return null;
+
+    return (
+        <View style={styles.drawer}>
+            <Text style={styles.title}>Offres de billets disponibles</Text>
+            {offers.length === 0 ? (
+                <Text>Chargement des offres...</Text>
+            ) : (
+                offers.map((o) => {
+                    console.log('Rendering drawer row for', o.offerId);
+                    return (
+                        <OfferRow
+                            key={o.offerId}
+                            name={o.name}
+                            price={o.price}
+                            quantity={quantities[o.offerId]}
+                            onIncrement={() => {
+                                console.log('increment drawer for', o.offerId);
+                                increment(o.offerId);
+                            }}
+                            onDecrement={() => {
+                                console.log('decrement drawer for', o.offerId);
+                                decrement(o.offerId);
+                            }}
+                        />
+                    );
+                })
+            )}
+            <View style={styles.actions}>
+                <MainButton label="Valider" onPress={onValidate} />
+                <MainButton label="Fermer" onPress={onClose} />
+            </View>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    drawer: {
+        position: 'fixed',
+        right: 0,
+        top: 0,
+        width: 600,
+        height: '100%',
+        backgroundColor: theme.colors.page,
+        padding: theme.spacing.lg,
+        borderLeftWidth: 5,
+        borderLeftColor: theme.colors.border,
+        zIndex: 999,
     },
-    controls: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 'theme.spacing.sm',
-    },
-    controlButton: {
-        backgroundColor: theme.colors.primary,
-        borderRadius: 4,
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-    },
-    controlText: {
-        color: theme.colors.buttonText,
+    title: {
         fontSize: 18,
         fontWeight: 'bold',
-    },
-    quantity: {
-        fontSize: 16,
+        marginBottom: theme.spacing.md,
         color: theme.colors.text,
-        marginHorizontal: 8,
+        textAlign: 'center',
     },
     actions: {
         marginTop: theme.spacing.lg,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         gap: theme.spacing.sm,
     },
 });

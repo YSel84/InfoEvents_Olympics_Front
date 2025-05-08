@@ -1,51 +1,65 @@
 import { create } from 'zustand';
+import {
+    fetchOffersByEvent,
+    Offer as ApiOffer,
+} from '../app/lib/_eventService';
 
-export type OfferType = 'Solo' | 'Duo' | 'Familiale';
-
-export type OfferDetails = {
-    label: string;
+export interface Offer {
+    offerId: string;
+    name: string;
     price: number;
-};
-
-export const OFFER_DEFINITIONS: Record<OfferType, OfferDetails> = {
-    Solo: { label: 'Solo - Un billet', price: 100 },
-    Duo: { label: 'Duo - Deux billets', price: 190 },
-    Familiale: { label: 'Familiale - Quatre billets', price: 340 },
-};
+    stock: number;
+}
 
 type OfferStore = {
-    quantities: Record<OfferType, number>;
-    increment: (type: OfferType) => void;
-    decrement: (type: OfferType) => void;
-    reset: () => void;
+    offers: Offer[];
+    quantities: Record<string, number>;
+
+    fetchOffers: (eventId: string) => Promise<void>;
+    increment: (offerId: string) => void;
+    decrement: (offerId: string) => void;
+    resetQuantities: () => void;
 };
 
-export const useOfferStore = create<OfferStore>((set) => ({
-    quantities: {
-        Solo: 0,
-        Duo: 0,
-        Familiale: 0,
-    },
-    increment: (type) =>
-        set((state) => ({
-            quantities: {
-                ...state.quantities,
-                [type]: state.quantities[type] + 1,
-            },
-        })),
-    decrement: (type) =>
-        set((state) => ({
-            quantities: {
-                ...state.quantities,
-                [type]: Math.max(state.quantities[type] - 1, 0),
-            },
-        })),
-    reset: () =>
+export const useOfferStore = create<OfferStore>((set, get) => ({
+    offers: [],
+    quantities: {},
+
+    fetchOffers: async (eventId: string) => {
+        const apiOffers: ApiOffer[] = await fetchOffersByEvent(eventId);
         set({
+            offers: apiOffers,
+            quantities: apiOffers.reduce(
+                (acc, o) => ({ ...acc, [o.offerId]: 0 }),
+                {} as Record<string, number>,
+            ),
+        });
+    },
+
+    increment: (offerId: string) =>
+        set((state) => ({
             quantities: {
-                Solo: 0,
-                Duo: 0,
-                Familiale: 0,
+                ...state.quantities,
+                [offerId]: (state.quantities[offerId] || 0) + 1,
             },
-        }),
+        })),
+
+    decrement: (offerId: string) =>
+        set((state) => ({
+            quantities: {
+                ...state.quantities,
+                [offerId]: Math.max((state.quantities[offerId] || 0) - 1, 0),
+            },
+        })),
+
+    resetQuantities: () =>
+        set((state) => ({
+            quantities: state.offers.reduce(
+                (acc, o) => {
+                    acc[o.offerId] = 0;
+                    return acc;
+                },
+                {} as Record<string, number>,
+            ),
+        })),
 }));

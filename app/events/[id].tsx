@@ -17,9 +17,10 @@ import MainButton from '../components/ui/MainButton';
 import WebWrapper from '../components/WebWrapper';
 import TicketOfferModal from '../components/TicketOffersModal';
 import WebOfferDrawer from '../components/WebOfferDrawer';
-import ScrollContainer from '../components/ScrollContainer';
+
 //API
 import { fetchEventById, Event } from '../lib/_eventService';
+import { FormattedDate } from '../components/utils/FormattedDate';
 
 export default function EventDetail() {
     const { id } = useLocalSearchParams();
@@ -34,7 +35,7 @@ export default function EventDetail() {
     const [showOfferPanel, setShowOfferPanel] = useState(false);
 
     //Offer & cart store
-    const { quantities, reset } = useOfferStore();
+    const { offers, quantities, resetQuantities } = useOfferStore();
     const { addToCart } = useCartStore();
 
     //No event available
@@ -48,18 +49,18 @@ export default function EventDetail() {
     }, [id]);
 
     const handleValidate = () => {
-        (['Solo', 'Duo', 'Familiale'] as const).forEach((offerType) => {
-            const quantity = quantities[offerType];
-            if (quantity > 0 && event) {
+        offers.forEach((o) => {
+            const qty = quantities[o.offerId] || 0;
+            if (qty > 0 && event) {
                 addToCart({
                     eventId: id as string,
                     eventTitle: event.title,
-                    offerType,
-                    quantity,
+                    offerId: o.offerId,
+                    quantity: qty,
                 });
             }
         });
-        reset();
+        resetQuantities();
         setShowOfferPanel(false);
     };
 
@@ -74,7 +75,7 @@ export default function EventDetail() {
             <View style={[styles.slideContainer, drawerOffset]}>
                 <ScrollView
                     contentContainerStyle={styles.container}
-                    style={{ backgroundColor: theme.colors.surface }}
+                    style={{ backgroundColor: theme.colors.page }}
                 >
                     {loading ? (
                         <ActivityIndicator
@@ -82,24 +83,31 @@ export default function EventDetail() {
                             color={theme.colors.primary}
                         />
                     ) : error || !event ? (
-                        <Text style={{ color: 'red' }}>
+                        <Text style={{ color: theme.colors.danger }}>
                             {error || 'Evénement introuvable'}
                         </Text>
                     ) : (
                         <>
                             <Text style={styles.title}>{event.title}</Text>
-                            <Text style={styles.subtitle}>
-                                {event.location}
-                            </Text>
-                            <Text style={styles.subtitle}>
-                                {event.event_datetime}
-                            </Text>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Text style={styles.subtitle}>
+                                    {event.location}
+                                </Text>
+                                <View style={{ width: 8 }} />
+                                <FormattedDate value={event.event_datetime} />
+                            </View>
+
                             <Text style={styles.description}>
                                 {event.description}
                             </Text>
                             <View style={styles.buttonGroup}>
                                 <MainButton
-                                    label="Choisir des billets"
+                                    label="Voir les offres de billets"
                                     onPress={() => setShowOfferPanel(true)}
                                 />
                                 <MainButton
@@ -114,6 +122,7 @@ export default function EventDetail() {
 
             {/*Drawer Web*/}
             <WebOfferDrawer
+                eventId={typeof id === 'string' ? id : id[0]}
                 isOpen={showOfferPanel}
                 onClose={() => setShowOfferPanel(false)}
                 onValidate={handleValidate}
@@ -121,6 +130,7 @@ export default function EventDetail() {
 
             {/*Modal*/}
             <TicketOfferModal
+                eventId={typeof id === 'string' ? id : id[0]}
                 isVisible={Platform.OS !== 'web' && showOfferPanel}
                 onClose={() => setShowOfferPanel(false)}
                 onValidate={handleValidate}
@@ -139,7 +149,7 @@ const styles = StyleSheet.create({
         padding: theme.spacing.lg,
         alignItems: 'center',
         gap: theme.spacing.md,
-        backgroundColor: theme.colors.surface,
+        backgroundColor: theme.colors.page,
         minHeight: 400,
     },
     title: {
