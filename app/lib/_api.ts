@@ -4,13 +4,31 @@
  * deal with 401
  *
  */
-
+import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 
-const API_BASE_URL =
-    Constants.expoConfig?.extra?.API_BASE_URL ?? 'http://localhost:8080';
+// Base URL pour web vs mobile, avec fallback local
+const extra = Constants.expoConfig?.extra as Record<string, string>;
+
+export const API_BASE_URL =
+    Platform.OS === 'web'
+        ? (process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080/api')
+        : extra.API_BASE_URL!;
+
+export const FRONT_USERNAME =
+    Platform.OS === 'web'
+        ? process.env.EXPO_PUBLIC_FRONT_USERNAME!
+        : extra.FRONT_USERNAME!;
+
+export const FRONT_PASSWORD =
+    Platform.OS === 'web'
+        ? process.env.EXPO_PUBLIC_FRONT_PASSWORD!
+        : extra.FRONT_PASSWORD!;
+
+/**const API_BASE_URL =
+    Constants.expoConfig?.extra?.API_BASE_URL ?? 'http://localhost:8080'; */
 
 export async function fetchWithAuth(
     path: string,
