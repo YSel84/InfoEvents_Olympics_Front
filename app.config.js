@@ -14,7 +14,7 @@ export default {
         },
     },
     plugins: [
-        [
+        /**  [
             'expo-constants',
             {
                 extra: {
@@ -26,7 +26,7 @@ export default {
                 FRONT_USERNAME: process.env.FRONT_USERNAME,
                 FRONT_PASSWORD: process.env.FRONT_PASSWORD,
             },
-        ],
+        ],*/
         [
             'expo-secure-store',
             {
