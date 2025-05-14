@@ -16,6 +16,7 @@ import {
     UserProfile,
     RegisterRequest,
 } from '../app/lib/_authService';
+import { useCartStore } from './cartStore';
 
 interface AuthState {
     accessToken: string | null;
@@ -51,6 +52,8 @@ export const useAuthStore = create<AuthState>()(
                     // get profile + store
                     const profile = await fetchMe(token);
                     set({ user: profile, isLoading: false });
+                    console.log('[Auth] Login OK, mergeGuestCart...');
+                    await useCartStore.getState().mergeCart();
                 } catch (err: any) {
                     set({
                         error: err.message ?? 'Erreur de connexion',

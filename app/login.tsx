@@ -12,7 +12,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 //Store
 import { useAuthStore } from '../stores/authStore';
@@ -29,6 +29,10 @@ export default function LoginPage() {
     const user = useAuthStore((s) => s.user);
     const isLoading = useAuthStore((s) => s.isLoading);
     const error = useAuthStore((s) => s.error);
+    const params = useLocalSearchParams<{ redirectTo?: string | string[] }>();
+    const target = Array.isArray(params.redirectTo)
+        ? params.redirectTo[0]
+        : params.redirectTo;
 
     //authentification const
     const [email, setEmail] = useState('');
@@ -37,9 +41,13 @@ export default function LoginPage() {
     //if connected, redirect
     useEffect(() => {
         if (user) {
-            router.replace('/account');
+            if (target) {
+                router.replace(`/${target.toString().toLowerCase()}`);
+            } else {
+                router.replace('/account');
+            }
         }
-    }, [user, router]);
+    }, [user, target, router]);
 
     // spinner or nothing if reload and connected user
     if (isLoading || user) {

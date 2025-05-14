@@ -50,9 +50,9 @@ export default function EventScreen() {
         >
             <Card
                 title={item.title}
-                event_datetime={item.event_datetime}
+                eventDateTime={item.eventDateTime}
                 location={item.location}
-                image_url={item.image_url}
+                imageUrl={item.imageUrl}
             >
                 <MainButton
                     label="Informations et billets"
@@ -92,7 +92,7 @@ export default function EventScreen() {
             <FlatList
                 data={visibleEvents}
                 numColumns={numCols}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.id.toString()}
                 columnWrapperStyle={numCols > 1 && styles.columnWrapper}
                 contentContainerStyle={styles.listContainer}
                 renderItem={renderItem}

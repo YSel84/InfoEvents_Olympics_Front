@@ -26,7 +26,9 @@ export default function HeaderWeb() {
     const logout = useAuthStore((s) => s.logout);
 
     const pathname = usePathname();
-    const total = useCartStore((state) => state.getTotalQuantity());
+    const total = useCartStore((state) =>
+        state.cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    );
     const { width } = useWindowDimensions();
     const isMobile = width < 768;
 

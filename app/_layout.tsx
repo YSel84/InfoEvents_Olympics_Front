@@ -4,18 +4,37 @@ import HeaderWeb from './components/Header';
 import Footer from './components/Footer';
 import TabBar from './components/TabBar';
 import HeaderMobile from './components/Header.mobile';
+import 'react-native-get-random-values';
 
 import { useAuthStore } from '../stores/authStore';
 import { useEffect, useState } from 'react';
 import { theme } from '../styles/theme';
+import { useCartStore } from '@/stores/cartStore';
 
 export default function RootLayout() {
     const fetchProfile = useAuthStore((s) => s.fetchProfile);
+    const initCart = useCartStore((s) => s.initCart);
     const [initializing, setInitializing] = useState(true);
 
     useEffect(() => {
-        fetchProfile().finally(() => setInitializing(false));
-    }, [fetchProfile]);
+        (async () => {
+            try {
+                //fetch authStore
+                await fetchProfile();
+            } catch (e) {
+                console.warn('fetchProfile failed', e);
+            } finally {
+                //initialize cart (and merge)
+                try {
+                    await initCart();
+                } catch (e) {
+                    console.warn('initCart failed', e);
+                }
+            }
+        })().finally(() => {
+            setInitializing(false);
+        });
+    }, [fetchProfile, initCart]);
 
     if (initializing) {
         return (

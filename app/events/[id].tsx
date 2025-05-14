@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
     View,
@@ -7,72 +8,62 @@ import {
     Platform,
     ActivityIndicator,
 } from 'react-native';
-import { useEffect, useState } from 'react';
-//Datas & style
 import { theme } from '../../styles/theme';
 import { useCartStore } from '@/stores/cartStore';
 import { useOfferStore } from '@/stores/offerStore';
-//components
 import MainButton from '../components/ui/MainButton';
 import WebWrapper from '../components/WebWrapper';
-import TicketOfferModal from '../components/TicketOffersModal';
+import TicketOffersModal from '../components/TicketOffersModal';
 import WebOfferDrawer from '../components/WebOfferDrawer';
-
-//API
-import { fetchEventById, Event } from '../lib/_eventService';
+import { fetchEventById } from '../lib/_eventService';
 import { FormattedDate } from '../components/utils/FormattedDate';
+import type { Event } from '../types';
 
 export default function EventDetail() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
 
-    //Error & loading stuff
     const [event, setEvent] = useState<Event | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    //Modal&Drawer
     const [showOfferPanel, setShowOfferPanel] = useState(false);
 
-    //Offer & cart store
     const { offers, quantities, resetQuantities } = useOfferStore();
-    const { addToCart } = useCartStore();
+    const addToCart = useCartStore((s) => s.addToCart);
 
-    //No event available
+    //Load event
+
     useEffect(() => {
         if (typeof id === 'string') {
             fetchEventById(id)
                 .then(setEvent)
-                .catch(() => setError('Evénement introuvable'))
+                .catch(() => setError('Événement introuvable'))
                 .finally(() => setLoading(false));
         }
     }, [id]);
 
-    const handleValidate = () => {
-        offers.forEach((o) => {
+    // validate choices made in Offer drawer/modal
+    const handleValidate = async () => {
+        for (const o of offers) {
             const qty = quantities[o.offerId] || 0;
-            if (qty > 0 && event) {
-                addToCart({
-                    eventId: id as string,
-                    eventTitle: event.title,
-                    offerId: o.offerId,
-                    quantity: qty,
-                });
+            if (qty > 0) {
+                await addToCart(o.offerId, qty);
             }
-        });
+        }
         resetQuantities();
         setShowOfferPanel(false);
     };
 
-    //If web drawer
-    const drawerOffset =
-        Platform.OS === 'web' && showOfferPanel
-            ? { transform: [{ translateX: -360 }] }
-            : {};
+    // Fermeture du panneau/modal
+    const closePanel = () => {
+        resetQuantities();
+        setShowOfferPanel(false);
+    };
 
     return (
         <WebWrapper>
-            <View style={[styles.slideContainer, drawerOffset]}>
+            <View style={styles.slideContainer}>
                 <ScrollView
                     contentContainerStyle={styles.container}
                     style={{ backgroundColor: theme.colors.page }}
@@ -83,8 +74,8 @@ export default function EventDetail() {
                             color={theme.colors.primary}
                         />
                     ) : error || !event ? (
-                        <Text style={{ color: theme.colors.danger }}>
-                            {error || 'Evénement introuvable'}
+                        <Text style={styles.errorText}>
+                            {error || 'Événement introuvable'}
                         </Text>
                     ) : (
                         <>
@@ -98,10 +89,9 @@ export default function EventDetail() {
                                 <Text style={styles.subtitle}>
                                     {event.location}
                                 </Text>
-                                <View style={{ width: 8 }} />
-                                <FormattedDate value={event.event_datetime} />
+                                <Text style={styles.dot}>•</Text>
+                                <FormattedDate value={event.eventDateTime} />
                             </View>
-
                             <Text style={styles.description}>
                                 {event.description}
                             </Text>
@@ -111,7 +101,7 @@ export default function EventDetail() {
                                     onPress={() => setShowOfferPanel(true)}
                                 />
                                 <MainButton
-                                    label="Fermer"
+                                    label="Retour"
                                     onPress={() => router.back()}
                                 />
                             </View>
@@ -120,19 +110,19 @@ export default function EventDetail() {
                 </ScrollView>
             </View>
 
-            {/*Drawer Web*/}
+            {/* Drawer pour le web */}
             <WebOfferDrawer
-                eventId={typeof id === 'string' ? id : id[0]}
+                eventId={typeof id === 'string' ? id : ''}
                 isOpen={showOfferPanel}
-                onClose={() => setShowOfferPanel(false)}
+                onClose={closePanel}
                 onValidate={handleValidate}
             />
 
-            {/*Modal*/}
-            <TicketOfferModal
-                eventId={typeof id === 'string' ? id : id[0]}
+            {/* Modal pour le mobile */}
+            <TicketOffersModal
+                eventId={typeof id === 'string' ? id : ''}
                 isVisible={Platform.OS !== 'web' && showOfferPanel}
-                onClose={() => setShowOfferPanel(false)}
+                onClose={closePanel}
                 onValidate={handleValidate}
             />
         </WebWrapper>
@@ -172,5 +162,14 @@ const styles = StyleSheet.create({
         marginTop: theme.spacing.lg,
         //width: '100%',
         gap: theme.spacing.md,
+    },
+    errorText: {
+        color: theme.colors.danger,
+        textAlign: 'center',
+        marginTop: theme.spacing.lg,
+    },
+    dot: {
+        marginHorizontal: theme.spacing.sm,
+        color: theme.colors.text,
     },
 });

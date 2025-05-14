@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 
 // stores
@@ -17,16 +17,61 @@ export default function CartScreen() {
     const router = useRouter();
 
     // Cart and offers stores
-    const { cartItems, updateCart, removeItem, getTotalPrice } = useCartStore();
-    const { offers, fetchOffers } = useOfferStore();
+    const {
+        initCart,
+        cartItems,
+        errors,
+        validateCart,
+        updateCart,
+        removeItem,
+    } = useCartStore();
 
-    // Load offers data for all events in cart
+    const { offersByEvent, fetchOffers } = useOfferStore();
+
+    const [showLoginModal, setShowLoginModal] = useState(false);
+
+    // Initialize cart (sessionId, cartId, details)
     useEffect(() => {
-        const eventIds = Array.from(
-            new Set(cartItems.map((item) => item.eventId)),
-        );
-        eventIds.forEach((id) => fetchOffers(id));
+        initCart();
+    }, [initCart]);
+
+    //load offers for current items
+    useEffect(() => {
+        (async () => {
+            const uniqueEventIds = Array.from(
+                new Set(cartItems.map((item) => item.eventId)),
+            );
+            for (const id of uniqueEventIds) {
+                await fetchOffers(id.toString());
+            }
+        })();
     }, [cartItems, fetchOffers]);
+
+    //Compute ttotal
+    const priceTotal = useMemo(() => {
+        return cartItems.reduce((sum, item) => {
+            const eventOffers = offersByEvent[item.eventId] ?? [];
+            const offer = eventOffers.find((o) => o.offerId === item.offerId);
+            const price = offer?.price ?? 0;
+            return sum + price * item.quantity;
+        }, 0);
+    }, [cartItems, offersByEvent]);
+
+    const onValidate = async () => {
+        try {
+            await validateCart();
+            //if ok, payment
+            if (errors.length === 0) {
+                router.push('/checkout');
+            }
+        } catch (e: any) {
+            if (e.message === 'UNAUTHORIZED') {
+                setShowLoginModal(true);
+            } else {
+                console.error(e);
+            }
+        }
+    };
 
     return (
         <WebWrapper>
@@ -43,10 +88,12 @@ export default function CartScreen() {
                     <>
                         {cartItems.map((item) => {
                             // Lookup offer details
-                            const offer = offers.find(
+                            const eventOffers =
+                                offersByEvent[item.eventId] ?? [];
+                            const offer = eventOffers.find(
                                 (o) => o.offerId === item.offerId,
                             );
-                            const label = offer?.name ?? '';
+                            const label = offer?.name ?? '-';
                             const price = offer?.price ?? 0;
                             const totalLine = (price * item.quantity).toFixed(
                                 2,
@@ -57,7 +104,8 @@ export default function CartScreen() {
                                     {/* Info Column */}
                                     <View style={styles.infoColumn}>
                                         <Text style={styles.eventTitle}>
-                                            {item.eventTitle}
+                                            {item.eventTitle ||
+                                                'Evénement inconnu'}
                                         </Text>
                                         <Text style={styles.offerLabel}>
                                             {label}
@@ -89,16 +137,19 @@ export default function CartScreen() {
                         })}
 
                         <Text style={styles.total}>
-                            Total : {getTotalPrice().toFixed(2)} €
+                            Total : {priceTotal.toFixed(2)} €
                         </Text>
-
+                        {/*Error of validation if any */}
+                        {errors.map((err) => (
+                            <Text key={err} style={styles.errorText}>
+                                {err}
+                            </Text>
+                        ))}
                         <ActionGroup
                             actions={[
                                 {
                                     label: 'Valider le panier et passer au paiement',
-                                    onPress: () => {
-                                        // checkout logic
-                                    },
+                                    onPress: onValidate,
                                     size: 'large',
                                 },
                                 {
@@ -109,6 +160,43 @@ export default function CartScreen() {
                         />
                     </>
                 )}
+                {/*Connexion modal for guests */}
+                <Modal
+                    visible={showLoginModal}
+                    transparent
+                    animationType="slide"
+                    onRequestClose={() => setShowLoginModal(false)}
+                >
+                    <View style={styles.modalBackground}>
+                        <View style={styles.modalContainer}>
+                            <Text style={styles.modalText}>
+                                Connectez-vous ou créez un compte pour confirmer
+                                votre commande
+                            </Text>
+                            <MainButton
+                                label="Se connecter"
+                                onPress={() => {
+                                    setShowLoginModal(false);
+                                    router.push({
+                                        pathname: '/login',
+                                        params: { redirectTo: 'Cart' },
+                                    });
+                                }}
+                            />
+                            <View style={{ height: 8 }} />
+                            <MainButton
+                                label="Créer un compte"
+                                onPress={() => {
+                                    setShowLoginModal(false);
+                                    router.push({
+                                        pathname: '/register',
+                                        params: { redirectTo: 'Cart' },
+                                    });
+                                }}
+                            />
+                        </View>
+                    </View>
+                </Modal>
             </ScrollView>
         </WebWrapper>
     );
@@ -179,5 +267,27 @@ const styles = StyleSheet.create({
         marginTop: theme.spacing.lg,
         color: theme.colors.primary,
         textAlign: 'center',
+    },
+    modalBackground: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalContainer: {
+        width: 300,
+        padding: 20,
+        backgroundColor: 'white',
+        borderRadius: 8,
+    },
+    modalText: {
+        fontSize: 18,
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    errorText: {
+        color: theme.colors.danger,
+        textAlign: 'center',
+        marginTop: theme.spacing.lg,
     },
 });

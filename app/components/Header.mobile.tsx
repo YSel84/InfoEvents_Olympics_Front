@@ -25,7 +25,9 @@ export default function HeaderMobile() {
     //expo router thingy
     const router = useRouter();
     //Used for cart
-    const total = useCartStore((state) => state.getTotalQuantity());
+    const total = useCartStore((state) =>
+        state.cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    );
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
 
