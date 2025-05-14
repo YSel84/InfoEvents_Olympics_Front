@@ -1,3 +1,8 @@
+/**
+ * Mobile only header
+ *
+ */
+
 import {
     View,
     Text,
@@ -14,12 +19,17 @@ import { theme } from '../../styles/theme';
 import { useCartStore } from '@/stores/cartStore';
 
 import Badge from './Badge';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function HeaderMobile() {
     //expo router thingy
     const router = useRouter();
     //Used for cart
-    const total = useCartStore((state) => state.getTotalQuantity());
+    const total = useCartStore((state) =>
+        state.cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    );
+    const user = useAuthStore((s) => s.user);
+    const logout = useAuthStore((s) => s.logout);
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -36,16 +46,50 @@ export default function HeaderMobile() {
                     />
                 </TouchableOpacity>
 
-                <Text style={styles.title}>InfoEvent Olympics</Text>
+                {/*title or greeting */}
+                <Text style={styles.title}>
+                    {user ? `Bonjour, ${user.firstName}` : 'InfoEvent Olympics'}
+                </Text>
 
+                {/* icons account, cart... */}
                 <View style={styles.icons}>
-                    <TouchableOpacity>
-                        <Ionicons
-                            name="person-outline"
-                            size={22}
-                            color={theme.colors.primary}
-                        />
-                    </TouchableOpacity>
+                    {user ? (
+                        <>
+                            {/*Account */}
+                            <TouchableOpacity
+                                onPress={() => router.push('/account')}
+                            >
+                                <Ionicons
+                                    name="person-outline"
+                                    size={22}
+                                    color={theme.colors.primary}
+                                />
+                            </TouchableOpacity>
+                            {/* logged out*/}
+                            <TouchableOpacity
+                                onPress={() => {
+                                    logout();
+                                    router.replace('/login');
+                                }}
+                            >
+                                <Ionicons
+                                    name="log-out-outline"
+                                    size={22}
+                                    color={theme.colors.danger || 'red'}
+                                />
+                            </TouchableOpacity>
+                        </>
+                    ) : (
+                        //connection
+                        <TouchableOpacity onPress={() => router.push('/login')}>
+                            <Ionicons
+                                name="person-outline"
+                                size={22}
+                                color={theme.colors.primary}
+                            />
+                        </TouchableOpacity>
+                    )}
+
                     <TouchableOpacity onPress={() => router.push('/cart')}>
                         <View style={styles.iconContainer}>
                             <Ionicons

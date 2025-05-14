@@ -1,54 +1,106 @@
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Platform,
-} from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 
+import MainButton from './ui/MainButton';
+import OfferRow from './ui/OfferRow';
+import { useOfferStore, Offer as StoreOffer } from '@/stores/offerStore';
 import { theme } from '../../styles/theme';
-import MainButton from './MainButton';
+import { useCartStore } from '@/stores/cartStore';
+import { fetchOffersByEvent, Offer as ApiOffer } from '../lib/_eventService';
 
-import { useOfferStore } from '@/stores/offerStore';
-
-type Props = {
+interface Props {
+    eventId: string;
     isOpen: boolean;
     onClose: () => void;
-    onValidate: () => void;
-};
+    //onValidate: () => void;
+    onValidate: () => Promise<void>;
+}
 
-const offers = ['Solo', 'Duo', 'Familiale'] as const;
+export default function WebOfferDrawer({
+    eventId,
+    isOpen,
+    onClose,
+    onValidate,
+}: Props) {
+    //new
+    const {
+        offers,
+        quantities,
+        fetchOffers,
+        resetQuantities,
+        increment,
+        decrement,
+    } = useOfferStore();
+    /** old
+    const quantities = useOfferStore((state) => state.quantities);
+    const resetQuantities = useOfferStore((state) => state.resetQuantities);
+    const increment = useOfferStore((state) => state.increment);
+    const decrement = useOfferStore((state) => state.decrement);
 
-export default function WebOfferDrawer({ isOpen, onClose, onValidate }: Props) {
-    const { quantities, increment, decrement } = useOfferStore();
+    const [offers, setOffers] = React.useState<StoreOffer[]>([]);
+    */
+
+    //const addToCart = useCartStore((state) => state.addToCart);
+
+    useEffect(() => {
+        if (Platform.OS === 'web' && isOpen) {
+            resetQuantities(); //empty to load locally
+            //old
+            /** setOffers([]);
+            fetchOffersByEvent(eventId)
+                .then((apiOffers: ApiOffer[]) =>
+                    apiOffers.map((ao) => ({
+                        offerId: Number(ao.offerId),
+                        eventId: Number(eventId),
+                        name: ao.name,
+                        price: ao.price,
+                        stock: ao.stock,
+                    })),
+                )
+                .then(setOffers); */
+
+            //new
+            fetchOffers(eventId);
+        }
+    }, [eventId, isOpen]);
 
     if (Platform.OS !== 'web' || !isOpen) return null;
 
+    /** 
+     const handleValidate = async () => {
+        for (const o of offers) {
+            const qty = quantities[o.offerId] || 0;
+            if (qty > 0) {
+                await addToCart(o.offerId, qty);
+            }
+        }
+        onClose();
+    };
+    */
+
     return (
         <View style={styles.drawer}>
-            <Text style={styles.title}>Choisissez vos billets</Text>
-
-            {offers.map((offer) => (
-                <View key={offer} style={styles.offerRow}>
-                    <Text style={styles.offerName}>{offer}</Text>
-                    <View style={styles.controls}>
-                        <TouchableOpacity
-                            onPress={() => decrement(offer)}
-                            style={styles.controlButton}
-                        >
-                            <Text style={styles.controlText}>-</Text>
-                        </TouchableOpacity>
-                        <Text style={styles.quantity}>{quantities[offer]}</Text>
-                        <TouchableOpacity
-                            onPress={() => increment(offer)}
-                            style={styles.controlButton}
-                        >
-                            {' '}
-                            <Text style={styles.controlText}>+</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            ))}
+            <Text style={styles.title}>Offres de billets disponibles</Text>
+            {offers.length === 0 ? (
+                <Text>Chargement des offres...</Text>
+            ) : (
+                offers.map((o) => {
+                    return (
+                        <OfferRow
+                            key={o.offerId.toString()}
+                            name={o.name}
+                            price={o.price}
+                            quantity={quantities[o.offerId]}
+                            onIncrement={() => {
+                                increment(o.offerId);
+                            }}
+                            onDecrement={() => {
+                                decrement(o.offerId);
+                            }}
+                        />
+                    );
+                })
+            )}
             <View style={styles.actions}>
                 <MainButton label="Valider" onPress={onValidate} />
                 <MainButton label="Fermer" onPress={onClose} />
@@ -66,7 +118,7 @@ const styles = StyleSheet.create({
         height: '100%',
         backgroundColor: theme.colors.page,
         padding: theme.spacing.lg,
-        borderLeftWidth: 11,
+        borderLeftWidth: 5,
         borderLeftColor: theme.colors.border,
         zIndex: 999,
     },
@@ -77,44 +129,10 @@ const styles = StyleSheet.create({
         color: theme.colors.text,
         textAlign: 'center',
     },
-    offerRow: {
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-        borderRadius: theme.borderRadius,
-        padding: theme.spacing.md,
-        marginBottom: theme.spacing.md,
-        backgroundColor: theme.colors.surface,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    offerName: {
-        fontSize: 16,
-        color: theme.colors.text,
-    },
-    controls: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 'theme.spacing.sm',
-    },
-    controlButton: {
-        backgroundColor: theme.colors.primary,
-        borderRadius: 4,
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-    },
-    controlText: {
-        color: theme.colors.buttonText,
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    quantity: {
-        fontSize: 16,
-        color: theme.colors.text,
-        marginHorizontal: 8,
-    },
     actions: {
         marginTop: theme.spacing.lg,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         gap: theme.spacing.sm,
     },
 });

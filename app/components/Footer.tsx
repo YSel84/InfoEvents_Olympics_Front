@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { theme } from '../../styles/theme';
 
 export default function Footer() {
     return (
@@ -11,7 +12,7 @@ export default function Footer() {
 const styles = StyleSheet.create({
     container: {
         padding: 12,
-        backgroundColor: '#222',
+        backgroundColor: theme.colors.surface,
         alignItems: 'center',
     },
     text: {
