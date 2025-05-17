@@ -15,8 +15,8 @@ export default {
             API_BASE_URL:
                 process.env.EXPO_PUBLIC_API_BASE_URL ??
                 'http://localhost:5000/api',
-            FRONT_USERNAME: process.env.EXPO_PUBLIC_FRONT_USERNAME,
-            FRONT_PASSWORD: process.env.EXPO_PUBLIC_FRONT_PASSWORD,
+            FRONT_USERNAME: process.env.FRONT_USERNAME,
+            FRONT_PASSWORD: process.env.FRONT_PASSWORD,
         },
     },
     plugins: [
