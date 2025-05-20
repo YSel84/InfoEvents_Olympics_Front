@@ -1,63 +1,58 @@
-import { encode as btoa } from 'base-64';
-import Constants from 'expo-constants';
-import { Platform } from 'react-native';
+import { fetchWithAuth } from './_api';
+import { Event, Offer } from '../types';
 
-export type Event = {
-    id: string;
-    title: string;
-    location: string;
-    description: string;
-    date: string;
-    image_url: string;
-    featured: boolean;
-};
-
-const extra = (Constants.expoConfig?.extra || {}) as Record<string, string>;
-
-//EXPO_PUBLIC for communication with backend WEB version
-//Mobile : expo.extra
-
-const API_BASE_URL =
-    Platform.OS === 'web'
-        ? process.env.EXPO_PUBLIC_API_BASE_URL!
-        : extra.EXPO_PUBLIC_API_BASE_URL!;
-
-const FRONT_USERNAME =
-    Platform.OS === 'web'
-        ? process.env.EXPO_PUBLIC_FRONT_USERNAME!
-        : extra.FRONT_USERNAME!;
-
-const FRONT_PASSWORD =
-    Platform.OS === 'web'
-        ? process.env.EXPO_PUBLIC_FRONT_PASSWORD
-        : extra.FRONT_PASSWORD;
-
-const basicAuthHeader = 'Basic ' + btoa(`${FRONT_USERNAME}:${FRONT_PASSWORD}`);
-
+/**
+ * All events
+ */
 export async function fetchEvents(): Promise<Event[]> {
-    if (!API_BASE_URL) {
-        throw new Error("'API_BASE_URL non défini- vérifier .env et config");
-    }
-    const res = await fetch(`${API_BASE_URL}/events`, {
-        headers: {
-            Authorization: basicAuthHeader,
-            'Content-Type': 'application/json',
-        },
-    });
-
-    if (!res.ok) {
-        throw new Error('Erreur lors du chargement des événements');
-    }
-
-    return res.json();
+    const res = await fetchWithAuth(`/events`, { method: 'GET' });
+    if (!res.ok) throw new Error(`fetchEvents: ${res.status}`);
+    const raw = (await res.json()) as any[];
+    return raw.map((e) => ({
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        location: e.location,
+        eventDateTime: e.eventDateTime ?? e.event_datetime, //just in case
+        imageUrl: e.imageUrl,
+        featured: e.featured ?? false,
+    }));
 }
+
+/**
+ * event details
+ */
 export async function fetchEventById(id: string): Promise<Event> {
-    const res = await fetch(`${API_BASE_URL}/events/${id}`, {
-        headers: { Authorization: basicAuthHeader },
-    });
-
-    if (!res.ok) {
-        throw new Error('Evénement introuvable');
-    }
-    return res.json();
+    const res = await fetchWithAuth(`/events/${id}`, { method: 'GET' });
+    if (!res.ok) throw new Error(`fetchEventById: ${res.status}`);
+    const e = (await res.json()) as any;
+    return {
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        location: e.location,
+        eventDateTime: e.eventDateTime ?? e.event_datetime, //just in case
+        imageUrl: e.imageUrl,
+        featured: e.featured ?? false,
+    };
 }
+
+/**
+ * offers by event
+ */
+export async function fetchOffersByEvent(eventId: string): Promise<Offer[]> {
+    const res = await fetchWithAuth(`/events/${eventId}/offers`, {
+        method: 'GET',
+    });
+    if (!res.ok) throw new Error(`fetchOffersByEvent: ${res.status}`);
+    const raw = (await res.json()) as any[];
+    return raw.map((o) => ({
+        offerId: o.offerId,
+        eventId: o.eventId,
+        name: o.name,
+        price: o.price,
+        stock: o.stock ?? 0,
+    }));
+}
+
+export { Event, Offer };

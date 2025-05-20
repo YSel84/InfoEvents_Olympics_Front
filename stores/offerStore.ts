@@ -1,51 +1,73 @@
 import { create } from 'zustand';
+import * as eventService from '@/app/lib/_eventService';
 
-export type OfferType = 'Solo' | 'Duo' | 'Familiale';
-
-export type OfferDetails = {
-    label: string;
+export type Offer = {
+    offerId: number;
+    eventId: number;
+    name: string;
     price: number;
+    stock: number;
 };
 
-export const OFFER_DEFINITIONS: Record<OfferType, OfferDetails> = {
-    Solo: { label: 'Solo - Un billet', price: 100 },
-    Duo: { label: 'Duo - Deux billets', price: 190 },
-    Familiale: { label: 'Familiale - Quatre billets', price: 340 },
-};
+interface OfferStore {
+    offers: Offer[];
+    offersByEvent: Record<string, Offer[]>;
+    quantities: Record<number, number>;
 
-type OfferStore = {
-    quantities: Record<OfferType, number>;
-    increment: (type: OfferType) => void;
-    decrement: (type: OfferType) => void;
-    reset: () => void;
-};
+    fetchOffers: (eventId: string) => Promise<void>;
+    resetQuantities: () => void;
+    increment: (offerId: number) => void;
+    decrement: (offerId: number) => void;
+}
 
-export const useOfferStore = create<OfferStore>((set) => ({
-    quantities: {
-        Solo: 0,
-        Duo: 0,
-        Familiale: 0,
+export const useOfferStore = create<OfferStore>((set, get) => ({
+    offers: [],
+    offersByEvent: {},
+    quantities: {},
+
+    fetchOffers: async (eventId: string) => {
+        set({ offers: [] });
+
+        const cache = get().offersByEvent[eventId];
+        if (cache) {
+            set({ offers: cache });
+        } else {
+            const data = await eventService.fetchOffersByEvent(eventId);
+            set((state) => ({
+                offersByEvent: {
+                    ...state.offersByEvent,
+                    [eventId]: data,
+                },
+                offers: data,
+            }));
+        }
     },
-    increment: (type) =>
+
+    resetQuantities: () => {
+        set({ quantities: {} });
+    },
+
+    increment: (offerId: number) => {
         set((state) => ({
             quantities: {
                 ...state.quantities,
-                [type]: state.quantities[type] + 1,
+                [offerId]: (state.quantities[offerId] ?? 0) + 1,
             },
-        })),
-    decrement: (type) =>
-        set((state) => ({
-            quantities: {
-                ...state.quantities,
-                [type]: Math.max(state.quantities[type] - 1, 0),
-            },
-        })),
-    reset: () =>
-        set({
-            quantities: {
-                Solo: 0,
-                Duo: 0,
-                Familiale: 0,
-            },
-        }),
+        }));
+    },
+
+    decrement: (offerId: number) => {
+        set((state) => {
+            const current = state.quantities[offerId] ?? 0;
+            if (current <= 0) {
+                return {};
+            }
+            return {
+                quantities: {
+                    ...state.quantities,
+                    [offerId]: current - 1,
+                },
+            };
+        });
+    },
 }));

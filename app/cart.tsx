@@ -1,103 +1,204 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 
-//stores
+// stores
 import { useCartStore } from '@/stores/cartStore';
-import { OFFER_DEFINITIONS } from '@/stores/offerStore';
+import { useOfferStore } from '@/stores/offerStore';
 
-//Style
+// Style & components
 import { theme } from '../styles/theme';
-
-//Components
-import MainButton from './components/MainButton';
+import WebWrapper from './components/WebWrapper';
+import MainButton from './components/ui/MainButton';
+import QuantityControls from './components/ui/QuantityControls';
+import ActionGroup from './components/ui/ActionGroup';
 
 export default function CartScreen() {
-    //Cart store constants
-    const { cartItems, updateCart, removeItem, getTotalPrice } = useCartStore();
-
-    //expo thingy
     const router = useRouter();
 
-    return (
-        <ScrollView
-            contentContainerStyle={styles.container}
-            style={{ backgroundColor: theme.colors.page }}
-        >
-            <Text style={styles.title}>Votre panier</Text>
-            {cartItems.length === 0 ? (
-                <Text style={styles.empty}>Votre panier est vide.</Text>
-            ) : (
-                <>
-                    {cartItems.map((item) => {
-                        const offer = OFFER_DEFINITIONS[item.offerType];
-                        const totalLine = offer.price * item.quantity;
+    // Cart and offers stores
+    const {
+        initCart,
+        cartItems,
+        errors,
+        validateCart,
+        updateCart,
+        removeItem,
+    } = useCartStore();
 
-                        return (
-                            <View key={item.id} style={styles.item}>
-                                <View style={styles.row}>
-                                    <Text style={styles.label}>
-                                        {item.eventTitle}
-                                    </Text>
-                                    <Text style={styles.label}>
-                                        {offer.label}
-                                    </Text>
-                                </View>
-                                <View style={styles.row}>
-                                    <View style={styles.quantityControls}>
-                                        <MainButton
-                                            label="-"
-                                            onPress={() =>
-                                                updateCart(
-                                                    item.id,
-                                                    item.quantity - 1,
-                                                )
+    const { offersByEvent, fetchOffers } = useOfferStore();
+
+    const [showLoginModal, setShowLoginModal] = useState(false);
+
+    // Initialize cart (sessionId, cartId, details)
+    useEffect(() => {
+        initCart();
+    }, [initCart]);
+
+    //load offers for current items
+    useEffect(() => {
+        (async () => {
+            const uniqueEventIds = Array.from(
+                new Set(cartItems.map((item) => item.eventId)),
+            );
+            for (const id of uniqueEventIds) {
+                await fetchOffers(id.toString());
+            }
+        })();
+    }, [cartItems, fetchOffers]);
+
+    //Compute ttotal
+    const priceTotal = useMemo(() => {
+        return cartItems.reduce((sum, item) => {
+            const eventOffers = offersByEvent[item.eventId] ?? [];
+            const offer = eventOffers.find((o) => o.offerId === item.offerId);
+            const price = offer?.price ?? 0;
+            return sum + price * item.quantity;
+        }, 0);
+    }, [cartItems, offersByEvent]);
+
+    const onValidate = async () => {
+        try {
+            await validateCart();
+            //if ok, payment
+            if (errors.length === 0) {
+                router.push('/checkout');
+            }
+        } catch (e: any) {
+            if (e.message === 'UNAUTHORIZED') {
+                setShowLoginModal(true);
+            } else {
+                console.error(e);
+            }
+        }
+    };
+
+    return (
+        <WebWrapper>
+            <ScrollView
+                contentContainerStyle={styles.container}
+                style={{ backgroundColor: theme.colors.page }}
+                showsVerticalScrollIndicator={false}
+            >
+                <Text style={styles.title}>Votre panier</Text>
+
+                {cartItems.length === 0 ? (
+                    <Text style={styles.empty}>Votre panier est vide.</Text>
+                ) : (
+                    <>
+                        {cartItems.map((item) => {
+                            // Lookup offer details
+                            const eventOffers =
+                                offersByEvent[item.eventId] ?? [];
+                            const offer = eventOffers.find(
+                                (o) => o.offerId === item.offerId,
+                            );
+                            const label = offer?.name ?? '-';
+                            const price = offer?.price ?? 0;
+                            const totalLine = (price * item.quantity).toFixed(
+                                2,
+                            );
+
+                            return (
+                                <View key={item.id} style={styles.item}>
+                                    {/* Info Column */}
+                                    <View style={styles.infoColumn}>
+                                        <Text style={styles.eventTitle}>
+                                            {item.eventTitle ||
+                                                'Evénement inconnu'}
+                                        </Text>
+                                        <Text style={styles.offerLabel}>
+                                            {label}
+                                        </Text>
+                                    </View>
+                                    {/* Actions Column */}
+                                    <View style={styles.actionColumn}>
+                                        <Text style={styles.quantityLabel}>
+                                            Quantité
+                                        </Text>
+                                        <QuantityControls
+                                            quantity={item.quantity}
+                                            onChange={(q) =>
+                                                updateCart(item.id, q)
                                             }
-                                            style={styles.qtyBtn}
                                         />
-                                        <Text style={styles.quantityText}>
-                                            {item.quantity}
+                                        <Text style={styles.linePrice}>
+                                            {totalLine} €
                                         </Text>
                                         <MainButton
-                                            label="+"
-                                            onPress={() =>
-                                                updateCart(
-                                                    item.id,
-                                                    item.quantity + 1,
-                                                )
-                                            }
-                                            style={styles.qtyBtn}
+                                            label="Supprimer"
+                                            onPress={() => removeItem(item.id)}
+                                            size="small"
+                                            style={styles.removeBtn}
                                         />
                                     </View>
-                                    <Text style={styles.price}>
-                                        {totalLine.toFixed(2)} €
-                                    </Text>
                                 </View>
-                                <MainButton
-                                    label="supprimer"
-                                    onPress={() => removeItem(item.id)}
-                                    style={styles.removeBtn}
-                                ></MainButton>
-                            </View>
-                        );
-                    })}
-                    <Text style={styles.total}>
-                        Total : {getTotalPrice().toFixed(2)}€
-                    </Text>
-                    <View style={styles.actions}>
-                        <MainButton
-                            label="Valider le panier et payer"
-                            onPress={() => {
-                                /*futur paiement*/
-                            }}
-                        ></MainButton>
-                        <MainButton
-                            label="Continuer mes achats"
-                            onPress={() => router.back()}
-                        ></MainButton>
+                            );
+                        })}
+
+                        <Text style={styles.total}>
+                            Total : {priceTotal.toFixed(2)} €
+                        </Text>
+                        {/*Error of validation if any */}
+                        {errors.map((err) => (
+                            <Text key={err} style={styles.errorText}>
+                                {err}
+                            </Text>
+                        ))}
+                        <ActionGroup
+                            actions={[
+                                {
+                                    label: 'Valider le panier et passer au paiement',
+                                    onPress: onValidate,
+                                    size: 'large',
+                                },
+                                {
+                                    label: 'Continuer mes achats',
+                                    onPress: () => router.back(),
+                                },
+                            ]}
+                        />
+                    </>
+                )}
+                {/*Connexion modal for guests */}
+                <Modal
+                    visible={showLoginModal}
+                    transparent
+                    animationType="slide"
+                    onRequestClose={() => setShowLoginModal(false)}
+                >
+                    <View style={styles.modalBackground}>
+                        <View style={styles.modalContainer}>
+                            <Text style={styles.modalText}>
+                                Connectez-vous ou créez un compte pour confirmer
+                                votre commande
+                            </Text>
+                            <MainButton
+                                label="Se connecter"
+                                onPress={() => {
+                                    setShowLoginModal(false);
+                                    router.push({
+                                        pathname: '/login',
+                                        params: { redirectTo: 'Cart' },
+                                    });
+                                }}
+                            />
+                            <View style={{ height: 8 }} />
+                            <MainButton
+                                label="Créer un compte"
+                                onPress={() => {
+                                    setShowLoginModal(false);
+                                    router.push({
+                                        pathname: '/register',
+                                        params: { redirectTo: 'Cart' },
+                                    });
+                                }}
+                            />
+                        </View>
                     </View>
-                </>
-            )}
-        </ScrollView>
+                </Modal>
+            </ScrollView>
+        </WebWrapper>
     );
 }
 
@@ -105,70 +206,88 @@ const styles = StyleSheet.create({
     container: {
         paddingVertical: theme.spacing.lg,
         paddingHorizontal: theme.spacing.md,
-        alignItems: 'center',
-        gap: theme.spacing.md,
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         color: theme.colors.primary,
         marginBottom: theme.spacing.md,
+        textAlign: 'center',
     },
     empty: {
         fontSize: 16,
         color: theme.colors.secondaryText,
-    },
-    item: {
-        width: '100%',
-        backgroundColor: theme.colors.surface,
-        padding: theme.spacing.md,
-        borderRadius: theme.borderRadius,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-        marginBottom: theme.spacing.md,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: theme.spacing.sm,
-    },
-    label: {
-        fontSize: 16,
-        color: theme.colors.text,
-    },
-    quantityControls: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: theme.spacing.sm,
-    },
-    quantityText: {
-        fontSize: 16,
-        color: theme.colors.text,
-        minWidth: 24,
         textAlign: 'center',
     },
-    price: {
+    item: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        backgroundColor: theme.colors.surface,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        borderRadius: theme.borderRadius,
+        padding: theme.spacing.md,
+        marginBottom: theme.spacing.lg,
+    },
+    infoColumn: {
+        flex: 1,
+        paddingRight: theme.spacing.sm,
+    },
+    eventTitle: {
         fontSize: 16,
         fontWeight: 'bold',
         color: theme.colors.primary,
+        marginBottom: theme.spacing.xs,
+    },
+    offerLabel: {
+        fontSize: 14,
+        color: theme.colors.text,
+    },
+    actionColumn: {
+        alignItems: 'flex-end',
+        justifyContent: 'space-between',
+    },
+    quantityLabel: {
+        fontSize: 12,
+        color: theme.colors.secondaryText,
+        marginBottom: theme.spacing.xs,
+    },
+    linePrice: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: theme.colors.primary,
+        marginVertical: theme.spacing.xs,
     },
     removeBtn: {
         marginTop: theme.spacing.sm,
-        alignSelf: 'flex-end',
     },
     total: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
         marginTop: theme.spacing.lg,
         color: theme.colors.primary,
+        textAlign: 'center',
     },
-    actions: {
-        marginTop: theme.spacing.md,
-        gap: theme.spacing.sm,
-        width: '100%',
+    modalBackground: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
     },
-    qtyBtn: {
-        paddingVertical: 4,
-        paddingHorizontal: 4,
+    modalContainer: {
+        width: 300,
+        padding: 20,
+        backgroundColor: 'white',
+        borderRadius: 8,
+    },
+    modalText: {
+        fontSize: 18,
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    errorText: {
+        color: theme.colors.danger,
+        textAlign: 'center',
+        marginTop: theme.spacing.lg,
     },
 });
