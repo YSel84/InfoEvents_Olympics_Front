@@ -15,28 +15,32 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../styles/theme';
 import { Image } from 'expo-image';
 import { useCartStore } from '../../stores/cartStore';
-import Badge from './Badge';
+import Badge from './ui/Badge';
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import MainButton from './ui/MainButton';
 
 export default function HeaderWeb() {
     const router = useRouter();
-    const user = useAuthStore((s) => s.user);
-    const logout = useAuthStore((s) => s.logout);
-
     const pathname = usePathname();
+
     const total = useCartStore((state) =>
         state.cartItems.reduce((sum, item) => sum + item.quantity, 0),
     );
     const { width } = useWindowDimensions();
     const isMobile = width < 768;
 
+    //users & roles
+    const user = useAuthStore((s) => s.user);
+    const roles = useAuthStore((s) => s.roles);
+    const logout = useAuthStore((s) => s.logout);
+    const isEmployee = user !== null && roles.includes('EMPLOYEE');
+
     const [openNav, setOpenNav] = useState(false);
 
     return (
         <View style={styles.container}>
-            {/*logo + Brand section */}
+            {/* logo + brand */}
             <View style={styles.leftSection}>
                 <TouchableOpacity
                     onPress={() => router.push('/')}
@@ -50,46 +54,76 @@ export default function HeaderWeb() {
                 </TouchableOpacity>
                 <Text style={styles.brand}>InfoEvent My Tickets</Text>
             </View>
-            {/*Responsive section */}
-            <View style={styles.centerSection}>
-                {isMobile ? (
-                    <TouchableOpacity onPress={() => setOpenNav(!openNav)}>
-                        <Ionicons
-                            name="menu-outline"
-                            size={28}
-                            color={theme.colors.primary}
-                        />
-                    </TouchableOpacity>
-                ) : (
-                    <View style={styles.centerNav}>
-                        <TouchableOpacity onPress={() => router.push('/lorem')}>
-                            <Text style={styles.navItem}>Lorem Ipsum</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => router.push('/events')}
-                        >
-                            <Text style={styles.navItem}>
-                                Voir les événements
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-            </View>
 
-            {/*Right buttons */}
+            {/* nav links (masquées pour employé) */}
+            {!isEmployee && (
+                <View style={styles.centerSection}>
+                    {isMobile ? (
+                        <TouchableOpacity onPress={() => setOpenNav(!openNav)}>
+                            <Ionicons
+                                name="menu-outline"
+                                size={28}
+                                color={theme.colors.primary}
+                            />
+                        </TouchableOpacity>
+                    ) : (
+                        <View style={styles.centerNav}>
+                            <TouchableOpacity
+                                onPress={() => router.push('/lorem')}
+                            >
+                                <Text style={styles.navItem}>Lorem Ipsum</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => router.push('/events')}
+                            >
+                                <Text style={styles.navItem}>
+                                    Voir les événements
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
+            )}
+
+            {/* right side */}
             <View style={styles.rightNav}>
                 {user ? (
                     <>
                         <Text style={styles.navItem}>
                             Bonjour, {user.firstName}
                         </Text>
-                        <MainButton
-                            label="Déconnexion"
-                            onPress={() => {
-                                logout();
-                                router.replace('/login');
-                            }}
-                        />
+
+                        {isEmployee ? (
+                            <MainButton
+                                label="Déconnexion"
+                                onPress={() => {
+                                    logout();
+                                    router.replace('/login');
+                                }}
+                            />
+                        ) : (
+                            <>
+                                <MainButton
+                                    label="Déconnexion"
+                                    onPress={() => {
+                                        logout();
+                                        router.replace('/login');
+                                    }}
+                                />
+                                <TouchableOpacity
+                                    onPress={() => router.push('/cart')}
+                                >
+                                    <View style={styles.iconContainer}>
+                                        <Ionicons
+                                            name="cart-outline"
+                                            size={24}
+                                            color={theme.colors.primary}
+                                        />
+                                        <Badge value={total} />
+                                    </View>
+                                </TouchableOpacity>
+                            </>
+                        )}
                     </>
                 ) : (
                     <TouchableOpacity
@@ -102,23 +136,10 @@ export default function HeaderWeb() {
                         <Text style={styles.navItem}>Se connecter</Text>
                     </TouchableOpacity>
                 )}
-
-                <TouchableOpacity
-                    onPress={() => router.push({ pathname: '/cart' })}
-                >
-                    <View style={styles.iconContainer}>
-                        <Ionicons
-                            name="cart-outline"
-                            size={24}
-                            color={theme.colors.primary}
-                        />
-                        <Badge value={total} />
-                    </View>
-                </TouchableOpacity>
             </View>
 
-            {/*Smaller screen dropdown */}
-            {isMobile && openNav && (
+            {/* mobile dropdown */}
+            {!isEmployee && isMobile && openNav && (
                 <View style={[styles.mobileMenu, { top: 56 }]}>
                     <TouchableOpacity
                         onPress={() => {
@@ -206,5 +227,9 @@ const styles = StyleSheet.create({
         paddingVertical: theme.spacing.sm,
         zIndex: 1000,
         borderTopColor: theme.colors.border,
+    },
+    empLabel: {
+        fontStyle: 'italic',
+        color: theme.colors.secondaryText,
     },
 });

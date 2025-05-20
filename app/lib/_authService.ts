@@ -1,11 +1,4 @@
-import Constants from 'expo-constants';
 import { API_BASE_URL } from './_api';
-
-/** 
-//API base URL
-const API_BASE_URL =
-    Constants.expoConfig?.extra?.API_BASE_URL ?? 'http://localhost:8080';
-    */
 
 export interface AuthRequest {
     email: string;
@@ -48,10 +41,12 @@ export async function login(email: string, password: string): Promise<string> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password } as AuthRequest),
     });
+
     if (!res.ok) {
         throw new Error('Echec de la connexion');
     }
     const data: AuthResponse = await res.json();
+
     return data.token;
 }
 

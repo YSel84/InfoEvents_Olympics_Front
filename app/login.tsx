@@ -57,8 +57,9 @@ export default function LoginPage() {
     const handleSubmit = async () => {
         try {
             await login(email.trim(), password);
-        } catch {
+        } catch (err) {
             //in error
+            console.log('[LoginPage] login() failed', err);
         }
     };
 
@@ -87,6 +88,8 @@ export default function LoginPage() {
                         secureTextEntry
                         value={password}
                         onChangeText={setPassword}
+                        autoCapitalize="none"
+                        autoCorrect={false}
                     />
                     <MainButton label="Connexion" onPress={handleSubmit} />
                     {/**OAuth2 button **/}

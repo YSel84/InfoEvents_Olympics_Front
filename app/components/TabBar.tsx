@@ -1,15 +1,20 @@
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { theme } from '../../styles/theme';
-
-const tabs = [
-    { name: 'Accueil', route: '/' },
-    { name: 'Evénements', route: '/events' },
-    { name: 'Compte', route: '/account' },
-];
+import { useAuthStore } from '@/stores/authStore';
 
 export default function TabBar() {
     const router = useRouter();
+    const roles = useAuthStore((s) => s.roles);
+    const user = useAuthStore((s) => s.user);
+    const isEmployee = user !== null && roles.includes('EMPLOYEE');
+
+    //dynamic tabs depending on roles
+    const tabs = [
+        { name: 'Accueil', route: '/' },
+        ...(!isEmployee ? [{ name: 'Evenements', route: '/events' }] : []),
+        { name: 'Compte', route: '/account' },
+    ];
 
     return (
         <View style={styles.container}>

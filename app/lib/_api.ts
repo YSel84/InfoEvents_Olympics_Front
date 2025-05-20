@@ -17,7 +17,6 @@ export const API_BASE_URL =
         ? (process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080/api')
         : extra.API_BASE_URL!;
 
-
 export async function fetchWithAuth(
     path: string,
     options: RequestInit = {},
@@ -55,9 +54,6 @@ export async function fetchWithAuth(
         headers,
         body,
     };
-
-    //debug
-    //console.log('[fetchWIthAuth] ->', url, finalOptions);
 
     const res = await fetch(url, finalOptions);
     if (res.status === 401) {

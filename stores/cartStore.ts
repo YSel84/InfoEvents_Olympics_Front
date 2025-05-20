@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { v4 as uuidv4 } from 'uuid';
 import * as cartService from '@/app/lib/_cartService';
-import { useAuthStore } from './authStore';
 
 export type CartItem = {
     id: string;
@@ -49,8 +48,10 @@ export const useCartStore = create<CartStore>((set, get) => ({
             const cartId = await cartService.createOrGetCart(sid);
             set({ cartId });
         } catch (e) {
-            const details = await cartService.getCartDetails(sid);
-            if (details) set({ cartId: details.cartId });
+            console.log(
+                'Erreur à la création ou la récupération du panier :',
+                e,
+            );
         }
 
         // 3) charger les lignes
@@ -81,8 +82,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
         const cartId = get().cartId;
         if (!cartId) throw new Error('No cartId');
         try {
-            const { ok, total, errors } =
-                await cartService.validateCart(cartId);
+            const { total, errors } = await cartService.validateCart(cartId);
             set({ total, errors });
         } catch (e: any) {
             if (e.message === 'UNAUTHORIZED') throw new Error('UNAUTHORIZED');

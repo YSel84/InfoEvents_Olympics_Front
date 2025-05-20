@@ -14,23 +14,12 @@ export default {
             },
             API_BASE_URL:
                 process.env.EXPO_PUBLIC_API_BASE_URL ??
-                'http://localhost:5000/api',
+                'http://192.168.1.123:5000/api',
+            STRIPE_PUBLISHABLE_KEY:
+                process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? '',
         },
     },
     plugins: [
-        /**  [
-            'expo-constants',
-            {
-                extra: {
-                    API_BASE_URL: process.env.API_BASE_URL,
-                },
-                ...defaultExtra,
-                EXPO_PUBLIC_API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL,
-                //API_BASE_URL: process.env.API_BASE_URL,
-                FRONT_USERNAME: process.env.FRONT_USERNAME,
-                FRONT_PASSWORD: process.env.FRONT_PASSWORD,
-            },
-        ],*/
         [
             'expo-secure-store',
             {
