@@ -50,71 +50,77 @@ export default function HeaderMobile() {
                 </Text>
 
                 <View style={styles.icons}>
+                    {/* Cart icon visible to guests and non-employees */}
+                    {!isEmployee && (
+                        <TouchableOpacity
+                            style={styles.cartButton}
+                            onPress={() => router.push('/cart')}
+                        >
+                            <View style={styles.iconContainer}>
+                                <Ionicons
+                                    name="cart-outline"
+                                    size={24}
+                                    color={theme.colors.primary}
+                                />
+                                <Badge value={total} />
+                            </View>
+                        </TouchableOpacity>
+                    )}
+
                     {user ? (
-                        <>
-                            {isEmployee ? (
-                                <>
-                                    <TouchableOpacity
-                                        onPress={() => router.push('/scan')}
-                                    >
-                                        <Ionicons
-                                            name="qr-code-outline"
-                                            size={22}
-                                            color={theme.colors.primary}
-                                        />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            logout();
-                                            router.replace('/login');
-                                        }}
-                                    >
-                                        <Ionicons
-                                            name="log-out-outline"
-                                            size={22}
-                                            color={theme.colors.danger || 'red'}
-                                        />
-                                    </TouchableOpacity>
-                                </>
-                            ) : (
-                                <>
-                                    <TouchableOpacity
-                                        onPress={() => router.push('/account')}
-                                    >
-                                        <Ionicons
-                                            name="person-outline"
-                                            size={22}
-                                            color={theme.colors.primary}
-                                        />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            logout();
-                                            router.replace('/login');
-                                        }}
-                                    >
-                                        <Ionicons
-                                            name="log-out-outline"
-                                            size={22}
-                                            color={theme.colors.danger || 'red'}
-                                        />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        onPress={() => router.push('/cart')}
-                                    >
-                                        <View style={styles.iconContainer}>
-                                            <Ionicons
-                                                name="cart-outline"
-                                                size={24}
-                                                color={theme.colors.primary}
-                                            />
-                                            <Badge value={total} />
-                                        </View>
-                                    </TouchableOpacity>
-                                </>
-                            )}
-                        </>
+                        isEmployee ? (
+                            // Employee icons: scan & logout
+                            <>
+                                <TouchableOpacity
+                                    onPress={() => router.push('/scan')}
+                                >
+                                    <Ionicons
+                                        name="qr-code-outline"
+                                        size={22}
+                                        color={theme.colors.primary}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        logout();
+                                        router.replace('/login');
+                                    }}
+                                >
+                                    <Ionicons
+                                        name="log-out-outline"
+                                        size={22}
+                                        color={theme.colors.danger}
+                                    />
+                                </TouchableOpacity>
+                            </>
+                        ) : (
+                            // Authenticated user (not employee): account & logout
+                            <>
+                                <TouchableOpacity
+                                    onPress={() => router.push('/account')}
+                                >
+                                    <Ionicons
+                                        name="person-outline"
+                                        size={22}
+                                        color={theme.colors.primary}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        logout();
+                                        router.replace('/login');
+                                    }}
+                                >
+                                    <Ionicons
+                                        name="log-out-outline"
+                                        size={22}
+                                        color={theme.colors.danger}
+                                    />
+                                </TouchableOpacity>
+                            </>
+                        )
                     ) : (
+                        // Guest user: login icon
                         <TouchableOpacity onPress={() => router.push('/login')}>
                             <Ionicons
                                 name="person-outline"
@@ -137,6 +143,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+    },
+    cartButton: {
+        marginRight: theme.spacing.sm,
     },
     logo: {
         width: 36,

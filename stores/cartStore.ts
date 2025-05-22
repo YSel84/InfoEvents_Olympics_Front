@@ -17,6 +17,7 @@ interface CartStore {
     cartItems: CartItem[];
     total: number;
     errors: string[];
+    qrHashes: string[];
 
     initCart: () => Promise<void>;
     refreshCartDetails: () => Promise<void>;
@@ -25,6 +26,7 @@ interface CartStore {
     updateCart: (itemId: string, quantity: number) => Promise<void>;
     removeItem: (itemId: string) => Promise<void>;
     mergeCart: () => Promise<void>;
+    clearItems: () => void;
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
@@ -33,12 +35,14 @@ export const useCartStore = create<CartStore>((set, get) => ({
     cartItems: [],
     total: 0,
     errors: [],
+    qrHashes: [],
 
     initCart: async () => {
         // 1) récupérer ou générer le sessionId
         let sid = await AsyncStorage.getItem('sessionId');
         if (!sid) {
             sid = uuidv4();
+            console.log('[cartStore] Generated sessionId:', sid);
             await AsyncStorage.setItem('sessionId', sid);
         }
         set({ sessionId: sid });
@@ -82,7 +86,9 @@ export const useCartStore = create<CartStore>((set, get) => ({
         const cartId = get().cartId;
         if (!cartId) throw new Error('No cartId');
         try {
-            const { total, errors } = await cartService.validateCart(cartId);
+            //added qrHashes here
+            const { total, errors, qrHashes } =
+                await cartService.validateCart(cartId);
             set({ total, errors });
         } catch (e: any) {
             if (e.message === 'UNAUTHORIZED') throw new Error('UNAUTHORIZED');
@@ -123,5 +129,9 @@ export const useCartStore = create<CartStore>((set, get) => ({
         } catch (e) {
             console.error('[cartStore] mergeCart failed', e);
         }
+    },
+
+    clearItems: () => {
+        set({ cartItems: [] });
     },
 }));

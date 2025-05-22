@@ -40,7 +40,7 @@ export default function HeaderWeb() {
 
     return (
         <View style={styles.container}>
-            {/* logo + brand */}
+            {/* Left: logo + brand */}
             <View style={styles.leftSection}>
                 <TouchableOpacity
                     onPress={() => router.push('/')}
@@ -55,7 +55,7 @@ export default function HeaderWeb() {
                 <Text style={styles.brand}>InfoEvent My Tickets</Text>
             </View>
 
-            {/* nav links (masquées pour employé) */}
+            {/* Center nav links (masquées pour employee) */}
             {!isEmployee && (
                 <View style={styles.centerSection}>
                     {isMobile ? (
@@ -85,51 +85,34 @@ export default function HeaderWeb() {
                 </View>
             )}
 
-            {/* right side */}
+            {/* Right side: cart + login/logout */}
             <View style={styles.rightNav}>
-                {user ? (
-                    <>
-                        <Text style={styles.navItem}>
-                            Bonjour, {user.firstName}
-                        </Text>
-
-                        {isEmployee ? (
-                            <MainButton
-                                label="Déconnexion"
-                                onPress={() => {
-                                    logout();
-                                    router.replace('/login');
-                                }}
+                {!isEmployee && (
+                    <TouchableOpacity onPress={() => router.push('/cart')}>
+                        <View style={styles.iconContainer}>
+                            <Ionicons
+                                name="cart-outline"
+                                size={24}
+                                color={theme.colors.primary}
                             />
-                        ) : (
-                            <>
-                                <MainButton
-                                    label="Déconnexion"
-                                    onPress={() => {
-                                        logout();
-                                        router.replace('/login');
-                                    }}
-                                />
-                                <TouchableOpacity
-                                    onPress={() => router.push('/cart')}
-                                >
-                                    <View style={styles.iconContainer}>
-                                        <Ionicons
-                                            name="cart-outline"
-                                            size={24}
-                                            color={theme.colors.primary}
-                                        />
-                                        <Badge value={total} />
-                                    </View>
-                                </TouchableOpacity>
-                            </>
-                        )}
-                    </>
+                            <Badge value={total} />
+                        </View>
+                    </TouchableOpacity>
+                )}
+
+                {user ? (
+                    <MainButton
+                        label="Déconnexion"
+                        onPress={() => {
+                            logout();
+                            router.replace('/login');
+                        }}
+                    />
                 ) : (
                     <TouchableOpacity
                         onPress={() =>
                             router.push(
-                                `/login?redirecTo=${encodeURIComponent(pathname)}`,
+                                `/login?redirectTo=${encodeURIComponent(pathname)}`,
                             )
                         }
                     >
@@ -138,7 +121,7 @@ export default function HeaderWeb() {
                 )}
             </View>
 
-            {/* mobile dropdown */}
+            {/* Mobile dropdown */}
             {!isEmployee && isMobile && openNav && (
                 <View style={[styles.mobileMenu, { top: 56 }]}>
                     <TouchableOpacity

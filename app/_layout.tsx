@@ -13,6 +13,7 @@ import { useCartStore } from '../stores/cartStore';
 import { theme } from '../styles/theme';
 
 export default function RootLayout() {
+    console.log('[RootLayout] mounted');
     const fetchProfile = useAuthStore((s) => s.fetchProfile);
     const initCart = useCartStore((s) => s.initCart);
     const [initializing, setInitializing] = useState(true);
@@ -26,6 +27,7 @@ export default function RootLayout() {
             }
             try {
                 await initCart();
+                console.log('[RootLayout] calling initCart');
             } catch (e) {
                 console.warn('initCart failed', e);
             }
