@@ -40,7 +40,7 @@ export default function HeaderWeb() {
 
     return (
         <View style={styles.container}>
-            {/* Left: logo + brand */}
+            {/* left section: logo + brand */}
             <View style={styles.leftSection}>
                 <TouchableOpacity
                     onPress={() => router.push('/')}
@@ -55,7 +55,7 @@ export default function HeaderWeb() {
                 <Text style={styles.brand}>InfoEvent My Tickets</Text>
             </View>
 
-            {/* Center nav links (masquées pour employee) */}
+            {/* center section: nav links (hidden for employee) */}
             {!isEmployee && (
                 <View style={styles.centerSection}>
                     {isMobile ? (
@@ -85,43 +85,63 @@ export default function HeaderWeb() {
                 </View>
             )}
 
-            {/* Right side: cart + login/logout */}
+            {/* right nav: user actions */}
             <View style={styles.rightNav}>
-                {!isEmployee && (
-                    <TouchableOpacity onPress={() => router.push('/cart')}>
-                        <View style={styles.iconContainer}>
-                            <Ionicons
-                                name="cart-outline"
-                                size={24}
-                                color={theme.colors.primary}
-                            />
-                            <Badge value={total} />
-                        </View>
-                    </TouchableOpacity>
-                )}
-
                 {user ? (
-                    <MainButton
-                        label="Déconnexion"
-                        onPress={() => {
-                            logout();
-                            router.replace('/login');
-                        }}
-                    />
+                    isEmployee ? (
+                        <>
+                            <MainButton
+                                label="Déconnexion"
+                                onPress={() => {
+                                    logout();
+                                    router.replace('/login');
+                                }}
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <MainButton
+                                label="Déconnexion"
+                                onPress={() => {
+                                    logout();
+                                    router.replace('/login');
+                                }}
+                            />
+                            {/* Lien Mes billets */}
+                            <TouchableOpacity
+                                onPress={() => router.push('/tickets')}
+                            >
+                                <Text
+                                    style={[
+                                        styles.navItem,
+                                        { marginHorizontal: 12 },
+                                    ]}
+                                >
+                                    Mes billets
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => router.push('/cart')}
+                            >
+                                <View style={styles.iconContainer}>
+                                    <Ionicons
+                                        name="cart-outline"
+                                        size={24}
+                                        color={theme.colors.primary}
+                                    />
+                                    <Badge value={total} />
+                                </View>
+                            </TouchableOpacity>
+                        </>
+                    )
                 ) : (
-                    <TouchableOpacity
-                        onPress={() =>
-                            router.push(
-                                `/login?redirectTo=${encodeURIComponent(pathname)}`,
-                            )
-                        }
-                    >
+                    <TouchableOpacity onPress={() => router.push('/login')}>
                         <Text style={styles.navItem}>Se connecter</Text>
                     </TouchableOpacity>
                 )}
             </View>
 
-            {/* Mobile dropdown */}
+            {/* mobile dropdown */}
             {!isEmployee && isMobile && openNav && (
                 <View style={[styles.mobileMenu, { top: 56 }]}>
                     <TouchableOpacity
