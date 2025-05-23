@@ -29,17 +29,12 @@ Use expoGo to start the mobile version. A legacy version is needed as Expo upgra
 
 This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-Test (staging) version is deployed on netlify here:
-Prod (master) version is deployed on netlify here: 
+Test (staging) version is deployed on netlify here: https://test--infoeventolympics.netlify.app/ ;
 
+Prod (master) version is deployed on netlify here:  https://infoeventolympics.netlify.app/ ;
 
+-Mobile version : 
+Two options : 1/ use the .apk file (your should have the link...)
+2/ use ExpoGo. All expected mobile features should work (at least they did on my side). 
 
-
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
+Attention : Android Only. iOS hasn't been tested nor taken into account during dev. 
