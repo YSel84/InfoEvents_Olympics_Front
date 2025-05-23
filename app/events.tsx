@@ -9,7 +9,7 @@ import {
 import { useRouter } from 'expo-router';
 //Components
 import Card from './components/ui/Card';
-import WebWrapper from './components/WebWrapper';
+import WebWrapper from './components/utils/WebWrapper';
 
 import MainButton from './components/ui/MainButton';
 //Theme & store

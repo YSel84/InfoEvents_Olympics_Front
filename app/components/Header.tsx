@@ -1,9 +1,7 @@
 /**
  * web header
  *
- */
-
-import {
+ */ import {
     View,
     Text,
     StyleSheet,
@@ -38,7 +36,7 @@ export default function HeaderWeb() {
 
     return (
         <View style={styles.container}>
-            {/* logo + brand */}
+            {/* logo + marque */}
             <View style={styles.leftSection}>
                 <TouchableOpacity onPress={() => router.push('/')}>
                     <Image
@@ -50,7 +48,7 @@ export default function HeaderWeb() {
                 <Text style={styles.brand}>InfoEvent My Tickets</Text>
             </View>
 
-            {/* nav links (masquées pour employé) */}
+            {/* liens centraux pour les non-employés */}
             {!isEmployee && (
                 <View style={styles.centerSection}>
                     {isMobile ? (
@@ -84,7 +82,7 @@ export default function HeaderWeb() {
                 </View>
             )}
 
-            {/* right side */}
+            {/* section droite */}
             <View style={styles.rightNav}>
                 {user ? (
                     <>
@@ -98,24 +96,25 @@ export default function HeaderWeb() {
                                 router.replace('/login');
                             }}
                         />
-                        {!isEmployee && (
-                            <>
-                                <TouchableOpacity
-                                    onPress={() => router.push('/cart')}
-                                >
-                                    <View style={styles.iconContainer}>
-                                        <Ionicons
-                                            name="cart-outline"
-                                            size={24}
-                                            color={theme.colors.primary}
-                                        />
-                                        <Badge value={total} />
-                                    </View>
-                                </TouchableOpacity>
-                            </>
-                        )}
                     </>
-                ) : (
+                ) : null}
+
+                {/** --- Panier pour tous les non-employés (invités ET utilisateurs) --- **/}
+                {!isEmployee && (
+                    <TouchableOpacity onPress={() => router.push('/cart')}>
+                        <View style={styles.iconContainer}>
+                            <Ionicons
+                                name="cart-outline"
+                                size={24}
+                                color={theme.colors.primary}
+                            />
+                            <Badge value={total} />
+                        </View>
+                    </TouchableOpacity>
+                )}
+
+                {/** Si invité, on propose aussi le bouton Se connecter **/}
+                {!user && (
                     <TouchableOpacity
                         onPress={() =>
                             router.push(
@@ -128,7 +127,7 @@ export default function HeaderWeb() {
                 )}
             </View>
 
-            {/* mobile dropdown */}
+            {/* menu mobile déroulant */}
             {!isEmployee && isMobile && openNav && (
                 <View style={[styles.mobileMenu, { top: 56 }]}>
                     <TouchableOpacity
@@ -164,7 +163,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        flexWrap: 'nowrap',
         paddingVertical: theme.spacing.sm,
         paddingHorizontal: theme.spacing.md,
     },
@@ -176,36 +174,30 @@ const styles = StyleSheet.create({
         color: theme.colors.primary,
         fontSize: 16,
         fontWeight: 'bold',
+        marginLeft: theme.spacing.sm,
     },
     centerSection: {
         alignItems: 'center',
     },
-    navContainer: {
+    centerNav: {
         flexDirection: 'row',
-        gap: 12,
+        gap: theme.spacing.md,
     },
     navItem: {
         color: theme.colors.primary,
         fontSize: 16,
         textAlign: 'center',
-        marginVertical: theme.spacing.sm,
+        marginHorizontal: theme.spacing.sm,
     },
     rightNav: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 16,
-    },
-    centerNav: {
-        flexDirection: 'row',
         gap: theme.spacing.md,
     },
     logo: {
         width: 40,
         height: 40,
         opacity: 0.9,
-    },
-    logoContainer: {
-        marginRight: theme.spacing.md,
     },
     iconContainer: {
         position: 'relative',
@@ -219,9 +211,5 @@ const styles = StyleSheet.create({
         paddingVertical: theme.spacing.sm,
         zIndex: 1000,
         borderTopColor: theme.colors.border,
-    },
-    empLabel: {
-        fontStyle: 'italic',
-        color: theme.colors.secondaryText,
     },
 });

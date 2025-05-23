@@ -1,76 +1,78 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import MainButton from './MainButton';
-import { TicketDto } from '../../types';
-import { theme } from '../../../styles/theme';
+import { Text, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { theme } from '../../../styles/theme';
+import MainButton from './MainButton';
 
-interface Props {
+export type TicketDto = {
+    ticketId: number;
+    eventId: number;
+    eventTitle: string;
+    eventDateTime: string;
+    qrHash: string;
+    used: boolean;
+    orderId: number;
+};
+
+interface TicketCardProps {
     ticket: TicketDto;
 }
 
-export default function TicketCard({ ticket }: Props) {
+export default function TicketCard({ ticket }: TicketCardProps) {
     const router = useRouter();
 
+    const goToDetail = () => {
+        router.push(`/tickets/${ticket.ticketId}`);
+    };
+
     return (
-        <View style={styles.card}>
+        <TouchableOpacity
+            style={styles.card}
+            onPress={() => router.push(`/tickets/${ticket.ticketId}`)}
+        >
             <Text style={styles.title}>{ticket.eventTitle}</Text>
-            <Text style={styles.eventDate}>
-                {new Date(ticket.eventDateTime).toLocaleString()}
+            <Text style={styles.meta}>
+                {new Date(ticket.eventDateTime).toLocaleDateString()} — Réf. #
+                {ticket.ticketId}
             </Text>
-            <MainButton
-                label="Afficher le QR code"
-                onPress={() => router.push(`/tickets/${ticket.ticketId}`)}
-                size="small"
-            />
-        </View>
+            <Text style={styles.meta}>Commande #{ticket.orderId}</Text>
+            {ticket.used && <Text style={styles.used}>Déjà utilisé</Text>}
+            <View style={styles.buttonWrapper}>
+                <MainButton
+                    label="Afficher"
+                    onPress={goToDetail}
+                    size="small"
+                    fullWidth={false}
+                />
+            </View>
+        </TouchableOpacity>
     );
 }
 
 const styles = StyleSheet.create({
     card: {
         backgroundColor: theme.colors.surface,
-        borderRadius: theme.borderRadius,
         padding: theme.spacing.md,
-        marginVertical: theme.spacing.sm,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+        borderRadius: theme.borderRadius,
+        marginBottom: theme.spacing.md,
     },
     title: {
         fontSize: 16,
-        fontWeight: 'bold',
-        color: theme.colors.text,
-        marginBottom: theme.spacing.sm,
-    },
-
-    header: {
-        marginBottom: theme.spacing.sm,
-    },
-    eventTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
+        fontWeight: '600',
         color: theme.colors.text,
     },
-    eventDate: {
+    meta: {
         fontSize: 14,
         color: theme.colors.secondaryText,
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    orderId: {
-        fontSize: 12,
-        color: theme.colors.secondaryText,
+        marginTop: theme.spacing.xs,
     },
     used: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        color: theme.colors.primary,
-    },
-    usedTrue: {
+        marginTop: theme.spacing.xs,
         color: theme.colors.danger,
+        fontWeight: 'bold',
+    },
+    buttonWrapper: {
+        marginTop: theme.spacing.md,
+        alignItems: 'center',
     },
 });

@@ -52,7 +52,7 @@ export const useAuthStore = create<AuthState>()(
                     const token = await apiLogin(email, password);
                     set({ accessToken: token });
 
-                    // 2) Décodage maison du JWT pour extraire les rôles
+                    // 2) Décodage du JWT pour extraire les rôles
                     const decoded = parseJwt<{ roles: string[] }>(token);
                     set({ roles: decoded.roles });
 

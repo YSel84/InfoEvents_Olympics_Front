@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
 import MainButton from '../components/ui/MainButton';
-import WebWrapper from '../components/WebWrapper';
+import WebWrapper from '../components/utils/WebWrapper';
 
 import { useAuthStore } from '../../stores/authStore';
 import { useRouter } from 'expo-router';

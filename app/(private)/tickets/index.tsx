@@ -3,38 +3,37 @@ import {
     View,
     Text,
     StyleSheet,
-    ActivityIndicator,
     Platform,
+    ActivityIndicator,
 } from 'react-native';
 import { useTicketStore } from '../../../stores/ticketStore';
 import TicketCard from '../../components/ui/TicketCard';
-import WebWrapper from '../../components/WebWrapper';
-import ScrollContainer from '../../components/ScrollContainer';
+import WebWrapper from '../../components/utils/WebWrapper';
+import ScrollContainer from '../../components/ui/ScrollContainer';
 import { theme } from '../../../styles/theme';
 
 export default function TicketsScreen() {
     const { tickets, loading, error, fetchTickets, sortOption, setSortOption } =
         useTicketStore();
 
-    // Charge les tickets au montage
     useEffect(() => {
         fetchTickets();
     }, [fetchTickets]);
 
-    // Regroupe par titre d'événement
-    const ticketsByEvent: Record<string, typeof tickets> = tickets.reduce(
+    // regrouper par événement si besoin
+    const ticketsByEvent = tickets.reduce<Record<string, typeof tickets>>(
         (acc, ticket) => {
             const key = ticket.eventTitle;
             if (!acc[key]) acc[key] = [];
             acc[key].push(ticket);
             return acc;
         },
-        {} as Record<string, typeof tickets>,
+        {},
     );
 
-    const content = (
+    const body = (
         <View style={styles.container}>
-            {/* Sélecteur de tri */}
+            {/* sélecteur de tri */}
             <View style={styles.sortContainer}>
                 <Text
                     style={[
@@ -68,7 +67,6 @@ export default function TicketsScreen() {
             {!loading &&
                 !error &&
                 tickets.length > 0 &&
-                /* Section par événement */
                 Object.entries(ticketsByEvent).map(
                     ([eventTitle, eventTickets]) => (
                         <View key={eventTitle} style={styles.section}>
@@ -87,14 +85,12 @@ export default function TicketsScreen() {
         </View>
     );
 
-    // Utilisation de ScrollContainer pour le scrolling sur mobile et web
     const scrollable = (
         <ScrollContainer contentContainerStyle={styles.contentContainer}>
-            {content}
+            {body}
         </ScrollContainer>
     );
 
-    // Pour web, encapsuler dans WebWrapper
     return Platform.OS === 'web' ? (
         <WebWrapper>{scrollable}</WebWrapper>
     ) : (
@@ -109,7 +105,6 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        padding: theme.spacing.md,
         backgroundColor: theme.colors.page,
     },
     section: {
@@ -134,7 +129,7 @@ const styles = StyleSheet.create({
     sortContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginBottom: theme.spacing.md,
+        marginVertical: theme.spacing.md,
         gap: theme.spacing.md,
     },
     sortOption: {

@@ -30,7 +30,7 @@ export interface TicketDto {
     ticketId: number;
     eventId: number;
     eventTitle: string;
-    eventDateTime: string; // ISO
+    eventDateTime: string;
     qrHash: string;
     used: boolean;
     orderId: number;

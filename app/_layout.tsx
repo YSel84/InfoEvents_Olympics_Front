@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Slot } from 'expo-router';
 import { Platform, View, ActivityIndicator } from 'react-native';
-
-//import StripeProvider from './components/utils/StripeProvider.web';
 import HeaderWeb from './components/Header';
 import HeaderMobile from './components/Header.mobile';
-import Footer from './components/Footer';
-import TabBar from './components/TabBar';
+import Footer from './components/common/Footer';
+import TabBar from '../app/components/common/TabBar';
 
 import { useAuthStore } from '../stores/authStore';
 import { useCartStore } from '../stores/cartStore';
 import { theme } from '../styles/theme';
 
 export default function RootLayout() {
-    console.log('[RootLayout] mounted');
     const fetchProfile = useAuthStore((s) => s.fetchProfile);
     const initCart = useCartStore((s) => s.initCart);
     const [initializing, setInitializing] = useState(true);
@@ -27,7 +24,6 @@ export default function RootLayout() {
             }
             try {
                 await initCart();
-                console.log('[RootLayout] calling initCart');
             } catch (e) {
                 console.warn('initCart failed', e);
             }
@@ -51,7 +47,6 @@ export default function RootLayout() {
     }
 
     return (
-        //<StripeProvider>
         <View style={{ flex: 1 }}>
             {Platform.OS === 'web' ? <HeaderWeb /> : <HeaderMobile />}
             <View style={{ flex: 1 }}>
@@ -59,6 +54,5 @@ export default function RootLayout() {
             </View>
             {Platform.OS === 'web' ? <Footer /> : <TabBar />}
         </View>
-        //</StripeProvider>
     );
 }

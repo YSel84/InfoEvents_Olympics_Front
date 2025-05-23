@@ -10,7 +10,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useCartStore } from '@/stores/cartStore';
 import MainButton from '../components/ui/MainButton';
-import WebWrapper from '../components/WebWrapper';
+import WebWrapper from '../components/utils/WebWrapper';
 import { theme } from '../../styles/theme';
 
 export default function CheckoutScreen() {
@@ -40,7 +40,7 @@ export default function CheckoutScreen() {
     };
 
     const handleGoOrders = () => {
-        router.push('/orders');
+        router.push('/tickets');
     };
 
     // Before payment, render form
@@ -221,57 +221,3 @@ const styles = StyleSheet.create({
         marginVertical: theme.spacing.sm,
     },
 });
-
-/**
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useCartStore } from '@/stores/cartStore';
-
-export default function CheckoutScreen() {
-    const { qrHashes, total } = useCartStore();
-    const router = useRouter();
-
-    return (
-        <ScrollView style={checkoutStyles.container}>
-            <Text style={checkoutStyles.title}>
-                Confirmation de votre commande
-            </Text>
-            <Text style={checkoutStyles.total}>
-                Montant payé : {total.toFixed(2)} €
-            </Text>
-            <Text style={checkoutStyles.subtitle}>Vos e-billets :</Text>
-            {qrHashes.map((hash, idx) => (
-                <View key={hash} style={checkoutStyles.ticket}>
-                    <Text style={checkoutStyles.ticketLabel}>
-                        Billet {idx + 1}
-                    </Text>
-                    <Text style={checkoutStyles.qrText}>{hash}</Text>
-                </View>
-            ))}
-            <Text
-                style={checkoutStyles.link}
-                onPress={() => router.push('/account')}
-            >
-                Retour à l'accueil
-            </Text>
-        </ScrollView>
-    );
-}
-
-const checkoutStyles = StyleSheet.create({
-    container: { flex: 1, padding: 16 },
-    title: { fontSize: 24, marginBottom: 12 },
-    total: { fontSize: 18, marginBottom: 16 },
-    subtitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
-    ticket: {
-        marginBottom: 12,
-        padding: 8,
-        backgroundColor: '#f9f9f9',
-        borderRadius: 4,
-    },
-    ticketLabel: { fontSize: 16, marginBottom: 4 },
-    qrText: { fontSize: 14 },
-    link: { color: '#007AFF', marginTop: 24, textAlign: 'center' },
-});
-*/

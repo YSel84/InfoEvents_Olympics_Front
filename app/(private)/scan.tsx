@@ -1,5 +1,3 @@
-// Description: Écran mobile de scan de billets avec expo-camera v51 et CameraView
-
 import React, { useState } from 'react';
 import {
     View,
@@ -10,7 +8,7 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import WebWrapper from '../components/WebWrapper';
+import WebWrapper from '../components/utils/WebWrapper';
 import MainButton from '../components/ui/MainButton';
 import { fetchWithAuth } from '../lib/_api';
 import { useAuthStore } from '../../stores/authStore';
@@ -23,6 +21,7 @@ export default function ScanScreen() {
     const [scanned, setScanned] = useState(false);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
+    const [scanInfo, setScanInfo] = useState<any>(null);
 
     // 1) Plateforme web interdite
     if (Platform.OS === 'web') {
@@ -78,17 +77,32 @@ export default function ScanScreen() {
     const handleBarCodeScanned = async ({ data }: { data: string }) => {
         setScanned(true);
         setLoading(true);
+        setMessage(null);
+        setScanInfo(null);
+
         try {
-            const ticketId = parseInt(data, 10);
             const res = await fetchWithAuth('/tickets/scan', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ticketId }),
+                body: JSON.stringify({ qrHash: data }),
             });
             const json = await res.json();
-            setMessage(res.ok ? 'Billet validé !' : json.error || 'Erreur');
-        } catch {
-            setMessage('Erreur réseau');
+            if (res.ok) {
+                setScanInfo(json);
+                setMessage('Billet validé !');
+            } else if (res.status === 400) {
+                setMessage(
+                    json.status === 'ALREADY_USED'
+                        ? 'Billet déjà utilisé'
+                        : json.error || 'Erreur de validation',
+                );
+            } else if (res.status === 404) {
+                setMessage(json.error || 'Billet introuvable');
+            } else {
+                setMessage('Erreur serveur');
+            }
+        } catch (e) {
+            setMessage('Erreur réseau ' + e);
         } finally {
             setLoading(false);
         }
@@ -100,8 +114,24 @@ export default function ScanScreen() {
 
             {message && <Text style={styles.message}>{message}</Text>}
 
+            {/*Scan info */}
+            {scanInfo && (
+                <View style={styles.infoContainer}>
+                    {' '}
+                    <Text style={styles.infoText}>
+                        Événement : {scanInfo.eventTitle}
+                    </Text>
+                    <Text style={styles.infoText}>
+                        Titulaire : {scanInfo.holderName}
+                    </Text>
+                </View>
+            )}
+
             {!scanned && (
                 <CameraView
+                    barcodeScannerSettings={{
+                        barcodeTypes: ['qr'],
+                    }}
                     style={styles.camera}
                     facing={facing}
                     onBarcodeScanned={handleBarCodeScanned}
@@ -114,6 +144,7 @@ export default function ScanScreen() {
                     onPress={() => {
                         setScanned(false);
                         setMessage(null);
+                        setScanInfo(null);
                     }}
                 >
                     <Text style={styles.resetText}>
@@ -149,5 +180,15 @@ const styles = StyleSheet.create({
     resetText: {
         color: 'white',
         fontSize: 16,
+    },
+    infoContainer: {
+        padding: 16,
+        backgroundColor: 'rgba(0,0,0,0.1)',
+        marginHorizontal: 16,
+        borderRadius: 8,
+    },
+    infoText: {
+        fontSize: 16,
+        marginBottom: 4,
     },
 });

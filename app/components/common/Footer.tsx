@@ -1,10 +1,10 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { theme } from '../../styles/theme';
+import { theme } from '../../../styles/theme';
 
 export default function Footer() {
     return (
         <View style={styles.container}>
-            <Text style={styles.text}>Texte du Footer</Text>
+            <Text style={styles.text}>©InfoEvent - 2024</Text>
         </View>
     );
 }
@@ -16,7 +16,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     text: {
-        color: '#ccc',
-        fontSize: 14,
+        color: theme.colors.primary,
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
