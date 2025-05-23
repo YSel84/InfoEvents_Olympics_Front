@@ -21,3 +21,17 @@ export interface Event {
     imageUrl: string; //camelCase
     location: string;
 }
+
+/**
+ * Ticket details
+ *
+ */
+export interface TicketDto {
+    ticketId: number;
+    eventId: number;
+    eventTitle: string;
+    eventDateTime: string;
+    qrHash: string;
+    used: boolean;
+    orderId: number;
+}

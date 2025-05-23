@@ -20,7 +20,7 @@ import { useAuthStore } from '../stores/authStore';
 import { theme } from '../styles/theme';
 
 //Components
-import WebWrapper from './components/WebWrapper';
+import WebWrapper from './components/utils/WebWrapper';
 import MainButton from './components/ui/MainButton';
 
 export default function LoginPage() {
@@ -57,8 +57,9 @@ export default function LoginPage() {
     const handleSubmit = async () => {
         try {
             await login(email.trim(), password);
-        } catch {
+        } catch (err) {
             //in error
+            console.log('[LoginPage] login() failed', err);
         }
     };
 
@@ -87,6 +88,8 @@ export default function LoginPage() {
                         secureTextEntry
                         value={password}
                         onChangeText={setPassword}
+                        autoCapitalize="none"
+                        autoCorrect={false}
                     />
                     <MainButton label="Connexion" onPress={handleSubmit} />
                     {/**OAuth2 button **/}

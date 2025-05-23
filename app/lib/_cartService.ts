@@ -21,6 +21,7 @@ export type ValidateCartResponse = {
     ok: boolean;
     total: number;
     errors: string[];
+    qrHashes: string[];
 };
 
 /**
@@ -80,18 +81,23 @@ export async function mergeCart(sessionId: string): Promise<number> {
  *
  */
 export async function validateCart(
-    cardId: number,
+    cartId: number,
 ): Promise<ValidateCartResponse> {
+    //added a token for mock payment
+    const paymentToken = 'mock-tocken';
+
     const res = await fetchWithAuth(`${CART_BASE}/validate`, {
         method: 'POST',
         headers: { 'X-Session-Id': useCartStore.getState().sessionId },
-        body: JSON.stringify({ cardId }),
+        //added paymentToken here
+        body: JSON.stringify({ cartId, paymentToken }),
     });
     if (!res.ok) {
         if (res.status === 401) throw new Error('UNAUTHORIZED');
 
         throw new Error(`validateCart: ${res.status}`);
     }
+
     return await res.json();
 }
 

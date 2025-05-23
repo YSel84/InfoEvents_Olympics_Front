@@ -8,7 +8,7 @@ import { useOfferStore } from '@/stores/offerStore';
 
 // Style & components
 import { theme } from '../styles/theme';
-import WebWrapper from './components/WebWrapper';
+import WebWrapper from './components/utils/WebWrapper';
 import MainButton from './components/ui/MainButton';
 import QuantityControls from './components/ui/QuantityControls';
 import ActionGroup from './components/ui/ActionGroup';
@@ -24,6 +24,7 @@ export default function CartScreen() {
         validateCart,
         updateCart,
         removeItem,
+        clearItems,
     } = useCartStore();
 
     const { offersByEvent, fetchOffers } = useOfferStore();
@@ -47,7 +48,7 @@ export default function CartScreen() {
         })();
     }, [cartItems, fetchOffers]);
 
-    //Compute ttotal
+    //Compute total
     const priceTotal = useMemo(() => {
         return cartItems.reduce((sum, item) => {
             const eventOffers = offersByEvent[item.eventId] ?? [];
@@ -62,7 +63,8 @@ export default function CartScreen() {
             await validateCart();
             //if ok, payment
             if (errors.length === 0) {
-                router.push('/checkout');
+                clearItems(); //purge cart
+                router.push('/mockCheckout');
             }
         } catch (e: any) {
             if (e.message === 'UNAUTHORIZED') {

@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { v4 as uuidv4 } from 'uuid';
 import * as cartService from '@/app/lib/_cartService';
-import { useAuthStore } from './authStore';
 
 export type CartItem = {
     id: string;
@@ -18,6 +17,7 @@ interface CartStore {
     cartItems: CartItem[];
     total: number;
     errors: string[];
+    qrHashes: string[];
 
     initCart: () => Promise<void>;
     refreshCartDetails: () => Promise<void>;
@@ -26,6 +26,7 @@ interface CartStore {
     updateCart: (itemId: string, quantity: number) => Promise<void>;
     removeItem: (itemId: string) => Promise<void>;
     mergeCart: () => Promise<void>;
+    clearItems: () => void;
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
@@ -34,12 +35,14 @@ export const useCartStore = create<CartStore>((set, get) => ({
     cartItems: [],
     total: 0,
     errors: [],
+    qrHashes: [],
 
     initCart: async () => {
         // 1) récupérer ou générer le sessionId
         let sid = await AsyncStorage.getItem('sessionId');
         if (!sid) {
             sid = uuidv4();
+            console.log('[cartStore] Generated sessionId:', sid);
             await AsyncStorage.setItem('sessionId', sid);
         }
         set({ sessionId: sid });
@@ -49,8 +52,10 @@ export const useCartStore = create<CartStore>((set, get) => ({
             const cartId = await cartService.createOrGetCart(sid);
             set({ cartId });
         } catch (e) {
-            const details = await cartService.getCartDetails(sid);
-            if (details) set({ cartId: details.cartId });
+            console.log(
+                'Erreur à la création ou la récupération du panier :',
+                e,
+            );
         }
 
         // 3) charger les lignes
@@ -81,7 +86,8 @@ export const useCartStore = create<CartStore>((set, get) => ({
         const cartId = get().cartId;
         if (!cartId) throw new Error('No cartId');
         try {
-            const { ok, total, errors } =
+            //added qrHashes here
+            const { total, errors, qrHashes } =
                 await cartService.validateCart(cartId);
             set({ total, errors });
         } catch (e: any) {
@@ -123,5 +129,9 @@ export const useCartStore = create<CartStore>((set, get) => ({
         } catch (e) {
             console.error('[cartStore] mergeCart failed', e);
         }
+    },
+
+    clearItems: () => {
+        set({ cartItems: [] });
     },
 }));

@@ -1,15 +1,14 @@
+import React, { useEffect, useState } from 'react';
 import { Slot } from 'expo-router';
 import { Platform, View, ActivityIndicator } from 'react-native';
 import HeaderWeb from './components/Header';
-import Footer from './components/Footer';
-import TabBar from './components/TabBar';
 import HeaderMobile from './components/Header.mobile';
-import 'react-native-get-random-values';
+import Footer from './components/common/Footer';
+import TabBar from '../app/components/common/TabBar';
 
 import { useAuthStore } from '../stores/authStore';
-import { useEffect, useState } from 'react';
+import { useCartStore } from '../stores/cartStore';
 import { theme } from '../styles/theme';
-import { useCartStore } from '@/stores/cartStore';
 
 export default function RootLayout() {
     const fetchProfile = useAuthStore((s) => s.fetchProfile);
@@ -19,21 +18,17 @@ export default function RootLayout() {
     useEffect(() => {
         (async () => {
             try {
-                //fetch authStore
                 await fetchProfile();
             } catch (e) {
                 console.warn('fetchProfile failed', e);
-            } finally {
-                //initialize cart (and merge)
-                try {
-                    await initCart();
-                } catch (e) {
-                    console.warn('initCart failed', e);
-                }
             }
-        })().finally(() => {
+            try {
+                await initCart();
+            } catch (e) {
+                console.warn('initCart failed', e);
+            }
             setInitializing(false);
-        });
+        })();
     }, [fetchProfile, initCart]);
 
     if (initializing) {
@@ -50,6 +45,7 @@ export default function RootLayout() {
             </View>
         );
     }
+
     return (
         <View style={{ flex: 1 }}>
             {Platform.OS === 'web' ? <HeaderWeb /> : <HeaderMobile />}

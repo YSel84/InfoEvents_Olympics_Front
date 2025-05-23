@@ -3,10 +3,8 @@ import { View, Text, StyleSheet, Platform } from 'react-native';
 
 import MainButton from './ui/MainButton';
 import OfferRow from './ui/OfferRow';
-import { useOfferStore, Offer as StoreOffer } from '@/stores/offerStore';
+import { useOfferStore } from '@/stores/offerStore';
 import { theme } from '../../styles/theme';
-import { useCartStore } from '@/stores/cartStore';
-import { fetchOffersByEvent, Offer as ApiOffer } from '../lib/_eventService';
 
 interface Props {
     eventId: string;
@@ -31,52 +29,15 @@ export default function WebOfferDrawer({
         increment,
         decrement,
     } = useOfferStore();
-    /** old
-    const quantities = useOfferStore((state) => state.quantities);
-    const resetQuantities = useOfferStore((state) => state.resetQuantities);
-    const increment = useOfferStore((state) => state.increment);
-    const decrement = useOfferStore((state) => state.decrement);
-
-    const [offers, setOffers] = React.useState<StoreOffer[]>([]);
-    */
-
-    //const addToCart = useCartStore((state) => state.addToCart);
 
     useEffect(() => {
         if (Platform.OS === 'web' && isOpen) {
             resetQuantities(); //empty to load locally
-            //old
-            /** setOffers([]);
-            fetchOffersByEvent(eventId)
-                .then((apiOffers: ApiOffer[]) =>
-                    apiOffers.map((ao) => ({
-                        offerId: Number(ao.offerId),
-                        eventId: Number(eventId),
-                        name: ao.name,
-                        price: ao.price,
-                        stock: ao.stock,
-                    })),
-                )
-                .then(setOffers); */
-
-            //new
             fetchOffers(eventId);
         }
     }, [eventId, isOpen]);
 
     if (Platform.OS !== 'web' || !isOpen) return null;
-
-    /** 
-     const handleValidate = async () => {
-        for (const o of offers) {
-            const qty = quantities[o.offerId] || 0;
-            if (qty > 0) {
-                await addToCart(o.offerId, qty);
-            }
-        }
-        onClose();
-    };
-    */
 
     return (
         <View style={styles.drawer}>

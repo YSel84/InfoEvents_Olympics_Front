@@ -5,7 +5,7 @@ import {
     ViewStyle,
     StyleProp,
 } from 'react-native';
-import { theme } from '../../styles/theme';
+import { theme } from '../../../styles/theme';
 
 interface Props extends ScrollViewProps {
     children: React.ReactNode;

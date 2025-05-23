@@ -16,7 +16,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../stores/authStore';
 
 import MainButton from './components/ui/MainButton';
-import { DatePickerField } from './components/DatePicker';
+import { DatePickerField } from './components/ui/DatePicker';
 import { theme } from '../styles/theme';
 
 export default function RegisterPage() {
@@ -40,7 +40,7 @@ export default function RegisterPage() {
 
     const handleSubmit = async () => {
         if (password !== confirm) {
-            return; //confirmation message should be added
+            return;
         }
         try {
             await register({
@@ -89,6 +89,8 @@ export default function RegisterPage() {
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
             />
             <TextInput
                 placeholder="Confirmer le mot de passe"
@@ -96,6 +98,8 @@ export default function RegisterPage() {
                 secureTextEntry
                 value={confirm}
                 onChangeText={setConfirm}
+                autoCapitalize="none"
+                autoCorrect={false}
             />
             <MainButton label="S'inscrire" onPress={handleSubmit} />
             <Text style={styles.link} onPress={() => router.push('/login')}>
