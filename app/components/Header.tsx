@@ -16,21 +16,19 @@ import { theme } from '../../styles/theme';
 import { Image } from 'expo-image';
 import { useCartStore } from '../../stores/cartStore';
 import Badge from './ui/Badge';
+import MainButton from './ui/MainButton';
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
-import MainButton from './ui/MainButton';
 
 export default function HeaderWeb() {
     const router = useRouter();
     const pathname = usePathname();
-
-    const total = useCartStore((state) =>
-        state.cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    const total = useCartStore((s) =>
+        s.cartItems.reduce((sum, item) => sum + item.quantity, 0),
     );
     const { width } = useWindowDimensions();
     const isMobile = width < 768;
 
-    //users & roles
     const user = useAuthStore((s) => s.user);
     const roles = useAuthStore((s) => s.roles);
     const logout = useAuthStore((s) => s.logout);
@@ -40,12 +38,9 @@ export default function HeaderWeb() {
 
     return (
         <View style={styles.container}>
-            {/* left section: logo + brand */}
+            {/* logo + brand */}
             <View style={styles.leftSection}>
-                <TouchableOpacity
-                    onPress={() => router.push('/')}
-                    style={styles.logoContainer}
-                >
+                <TouchableOpacity onPress={() => router.push('/')}>
                     <Image
                         source={require('../../assets/images/logo.png')}
                         style={styles.logo}
@@ -55,7 +50,7 @@ export default function HeaderWeb() {
                 <Text style={styles.brand}>InfoEvent My Tickets</Text>
             </View>
 
-            {/* center section: nav links (hidden for employee) */}
+            {/* nav links (masquées pour employé) */}
             {!isEmployee && (
                 <View style={styles.centerSection}>
                     {isMobile ? (
@@ -69,73 +64,65 @@ export default function HeaderWeb() {
                     ) : (
                         <View style={styles.centerNav}>
                             <TouchableOpacity
-                                onPress={() => router.push('/lorem')}
-                            >
-                                <Text style={styles.navItem}>Lorem Ipsum</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
                                 onPress={() => router.push('/events')}
                             >
                                 <Text style={styles.navItem}>
                                     Voir les événements
                                 </Text>
                             </TouchableOpacity>
+                            {user && (
+                                <TouchableOpacity
+                                    onPress={() => router.push('/tickets')}
+                                >
+                                    <Text style={styles.navItem}>
+                                        Mes billets
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
                     )}
                 </View>
             )}
 
-            {/* right nav: user actions */}
+            {/* right side */}
             <View style={styles.rightNav}>
                 {user ? (
-                    isEmployee ? (
-                        <>
-                            <MainButton
-                                label="Déconnexion"
-                                onPress={() => {
-                                    logout();
-                                    router.replace('/login');
-                                }}
-                            />
-                        </>
-                    ) : (
-                        <>
-                            <MainButton
-                                label="Déconnexion"
-                                onPress={() => {
-                                    logout();
-                                    router.replace('/login');
-                                }}
-                            />
-                            {/* Lien Mes billets */}
-                            <TouchableOpacity
-                                onPress={() => router.push('/tickets')}
-                            >
-                                <Text
-                                    style={[
-                                        styles.navItem,
-                                        { marginHorizontal: 12 },
-                                    ]}
+                    <>
+                        <Text style={styles.navItem}>
+                            Bonjour, {user.firstName}
+                        </Text>
+                        <MainButton
+                            label="Déconnexion"
+                            onPress={() => {
+                                logout();
+                                router.replace('/login');
+                            }}
+                        />
+                        {!isEmployee && (
+                            <>
+                                <TouchableOpacity
+                                    onPress={() => router.push('/cart')}
                                 >
-                                    Mes billets
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => router.push('/cart')}
-                            >
-                                <View style={styles.iconContainer}>
-                                    <Ionicons
-                                        name="cart-outline"
-                                        size={24}
-                                        color={theme.colors.primary}
-                                    />
-                                    <Badge value={total} />
-                                </View>
-                            </TouchableOpacity>
-                        </>
-                    )
+                                    <View style={styles.iconContainer}>
+                                        <Ionicons
+                                            name="cart-outline"
+                                            size={24}
+                                            color={theme.colors.primary}
+                                        />
+                                        <Badge value={total} />
+                                    </View>
+                                </TouchableOpacity>
+                            </>
+                        )}
+                    </>
                 ) : (
-                    <TouchableOpacity onPress={() => router.push('/login')}>
+                    <TouchableOpacity
+                        onPress={() =>
+                            router.push(
+                                `login?redirectTo=${encodeURIComponent(pathname)}`,
+                            )
+                        }
+                    >
                         <Text style={styles.navItem}>Se connecter</Text>
                     </TouchableOpacity>
                 )}
@@ -146,20 +133,22 @@ export default function HeaderWeb() {
                 <View style={[styles.mobileMenu, { top: 56 }]}>
                     <TouchableOpacity
                         onPress={() => {
-                            router.push('/lorem');
-                            setOpenNav(false);
-                        }}
-                    >
-                        <Text style={styles.navItem}>Lorem Ipsum</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={() => {
                             router.push('/events');
                             setOpenNav(false);
                         }}
                     >
                         <Text style={styles.navItem}>Voir les événements</Text>
                     </TouchableOpacity>
+                    {user && (
+                        <TouchableOpacity
+                            onPress={() => {
+                                router.push('/tickets');
+                                setOpenNav(false);
+                            }}
+                        >
+                            <Text style={styles.navItem}>Mes billets</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             )}
         </View>

@@ -3,32 +3,23 @@ import {
     View,
     Text,
     StyleSheet,
-    ScrollView,
     ActivityIndicator,
     Platform,
 } from 'react-native';
-import { useTicketStore } from '../../stores/ticketStore'; // adjust path if needed
-import TicketCard from '../components/ui/TicketCard';
-import WebWrapper from '../components/WebWrapper';
-import ScrollContainer from '../components/ScrollContainer';
-import { theme } from '../../styles/theme';
+import { useTicketStore } from '../../../stores/ticketStore';
+import TicketCard from '../../components/ui/TicketCard';
+import WebWrapper from '../../components/WebWrapper';
+import ScrollContainer from '../../components/ScrollContainer';
+import { theme } from '../../../styles/theme';
 
 export default function TicketsScreen() {
     const { tickets, loading, error, fetchTickets, sortOption, setSortOption } =
         useTicketStore();
-    const [refreshing, setRefreshing] = React.useState(false);
 
     // Charge les tickets au montage
     useEffect(() => {
         fetchTickets();
     }, [fetchTickets]);
-
-    // Handler pour pull-to-refresh
-    const onRefresh = async () => {
-        setRefreshing(true);
-        await fetchTickets(sortOption);
-        setRefreshing(false);
-    };
 
     // Regroupe par titre d'événement
     const ticketsByEvent: Record<string, typeof tickets> = tickets.reduce(

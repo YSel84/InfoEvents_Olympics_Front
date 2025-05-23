@@ -1,34 +1,28 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import QRCode from 'react-native-qrcode-svg';
+import MainButton from './MainButton';
 import { TicketDto } from '../../types';
 import { theme } from '../../../styles/theme';
+import { useRouter } from 'expo-router';
 
 interface Props {
     ticket: TicketDto;
 }
 
 export default function TicketCard({ ticket }: Props) {
+    const router = useRouter();
+
     return (
         <View style={styles.card}>
-            <View style={styles.header}>
-                <Text style={styles.eventTitle}>{ticket.eventTitle}</Text>
-                <Text style={styles.eventDate}>
-                    {new Date(ticket.eventDateTime).toLocaleString()}
-                </Text>
-            </View>
-
-            <View style={styles.qrContainer}>
-                {/* Génère le QR code à partir du qrHash */}
-                <QRCode value={ticket.qrHash} size={120} />
-            </View>
-
-            <View style={styles.footer}>
-                <Text style={styles.orderId}>Commande n° {ticket.orderId}</Text>
-                <Text style={[styles.used, ticket.used && styles.usedTrue]}>
-                    {ticket.used ? 'Utilisé' : 'Valide'}
-                </Text>
-            </View>
+            <Text style={styles.title}>{ticket.eventTitle}</Text>
+            <Text style={styles.eventDate}>
+                {new Date(ticket.eventDateTime).toLocaleString()}
+            </Text>
+            <MainButton
+                label="Afficher le QR code"
+                onPress={() => router.push(`/tickets/${ticket.ticketId}`)}
+                size="small"
+            />
         </View>
     );
 }
@@ -44,6 +38,13 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 2,
     },
+    title: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: theme.colors.text,
+        marginBottom: theme.spacing.sm,
+    },
+
     header: {
         marginBottom: theme.spacing.sm,
     },
@@ -55,10 +56,6 @@ const styles = StyleSheet.create({
     eventDate: {
         fontSize: 14,
         color: theme.colors.secondaryText,
-    },
-    qrContainer: {
-        alignItems: 'center',
-        marginVertical: theme.spacing.md,
     },
     footer: {
         flexDirection: 'row',
