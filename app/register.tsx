@@ -40,7 +40,7 @@ export default function RegisterPage() {
 
     const handleSubmit = async () => {
         if (password !== confirm) {
-            return; //confirmation message should be added
+            return;
         }
         try {
             await register({

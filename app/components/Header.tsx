@@ -1,9 +1,7 @@
 /**
  * web header
  *
- */
-
-import {
+ */ import {
     View,
     Text,
     StyleSheet,
@@ -16,21 +14,19 @@ import { theme } from '../../styles/theme';
 import { Image } from 'expo-image';
 import { useCartStore } from '../../stores/cartStore';
 import Badge from './ui/Badge';
+import MainButton from './ui/MainButton';
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
-import MainButton from './ui/MainButton';
 
 export default function HeaderWeb() {
     const router = useRouter();
     const pathname = usePathname();
-
-    const total = useCartStore((state) =>
-        state.cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    const total = useCartStore((s) =>
+        s.cartItems.reduce((sum, item) => sum + item.quantity, 0),
     );
     const { width } = useWindowDimensions();
     const isMobile = width < 768;
 
-    //users & roles
     const user = useAuthStore((s) => s.user);
     const roles = useAuthStore((s) => s.roles);
     const logout = useAuthStore((s) => s.logout);
@@ -40,12 +36,9 @@ export default function HeaderWeb() {
 
     return (
         <View style={styles.container}>
-            {/* Left: logo + brand */}
+            {/* logo + marque */}
             <View style={styles.leftSection}>
-                <TouchableOpacity
-                    onPress={() => router.push('/')}
-                    style={styles.logoContainer}
-                >
+                <TouchableOpacity onPress={() => router.push('/')}>
                     <Image
                         source={require('../../assets/images/logo.png')}
                         style={styles.logo}
@@ -55,7 +48,7 @@ export default function HeaderWeb() {
                 <Text style={styles.brand}>InfoEvent My Tickets</Text>
             </View>
 
-            {/* Center nav links (masquées pour employee) */}
+            {/* liens centraux pour les non-employés */}
             {!isEmployee && (
                 <View style={styles.centerSection}>
                     {isMobile ? (
@@ -69,24 +62,44 @@ export default function HeaderWeb() {
                     ) : (
                         <View style={styles.centerNav}>
                             <TouchableOpacity
-                                onPress={() => router.push('/lorem')}
-                            >
-                                <Text style={styles.navItem}>Lorem Ipsum</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
                                 onPress={() => router.push('/events')}
                             >
                                 <Text style={styles.navItem}>
                                     Voir les événements
                                 </Text>
                             </TouchableOpacity>
+                            {user && (
+                                <TouchableOpacity
+                                    onPress={() => router.push('/tickets')}
+                                >
+                                    <Text style={styles.navItem}>
+                                        Mes billets
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
                     )}
                 </View>
             )}
 
-            {/* Right side: cart + login/logout */}
+            {/* section droite */}
             <View style={styles.rightNav}>
+                {user ? (
+                    <>
+                        <Text style={styles.navItem}>
+                            Bonjour, {user.firstName}
+                        </Text>
+                        <MainButton
+                            label="Déconnexion"
+                            onPress={() => {
+                                logout();
+                                router.replace('/login');
+                            }}
+                        />
+                    </>
+                ) : null}
+
+                {/** --- Panier pour tous les non-employés (invités ET utilisateurs) --- **/}
                 {!isEmployee && (
                     <TouchableOpacity onPress={() => router.push('/cart')}>
                         <View style={styles.iconContainer}>
@@ -100,32 +113,23 @@ export default function HeaderWeb() {
                     </TouchableOpacity>
                 )}
 
-                {user ? (
-                    <MainButton
-                        label="Déconnexion"
-                        onPress={() => {
-                            logout();
-                            router.replace('/login');
-                        }}
-                    />
-                ) : (
-                    <TouchableOpacity onPress={() => router.push('login')}>
+                {/** Si invité, on propose aussi le bouton Se connecter **/}
+                {!user && (
+                    <TouchableOpacity
+                        onPress={() =>
+                            router.push(
+                                `login?redirectTo=${encodeURIComponent(pathname)}`,
+                            )
+                        }
+                    >
                         <Text style={styles.navItem}>Se connecter</Text>
                     </TouchableOpacity>
                 )}
             </View>
 
-            {/* Mobile dropdown */}
+            {/* menu mobile déroulant */}
             {!isEmployee && isMobile && openNav && (
                 <View style={[styles.mobileMenu, { top: 56 }]}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            router.push('/lorem');
-                            setOpenNav(false);
-                        }}
-                    >
-                        <Text style={styles.navItem}>Lorem Ipsum</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => {
                             router.push('/events');
@@ -134,6 +138,16 @@ export default function HeaderWeb() {
                     >
                         <Text style={styles.navItem}>Voir les événements</Text>
                     </TouchableOpacity>
+                    {user && (
+                        <TouchableOpacity
+                            onPress={() => {
+                                router.push('/tickets');
+                                setOpenNav(false);
+                            }}
+                        >
+                            <Text style={styles.navItem}>Mes billets</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             )}
         </View>
@@ -149,7 +163,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        flexWrap: 'nowrap',
         paddingVertical: theme.spacing.sm,
         paddingHorizontal: theme.spacing.md,
     },
@@ -161,36 +174,30 @@ const styles = StyleSheet.create({
         color: theme.colors.primary,
         fontSize: 16,
         fontWeight: 'bold',
+        marginLeft: theme.spacing.sm,
     },
     centerSection: {
         alignItems: 'center',
     },
-    navContainer: {
+    centerNav: {
         flexDirection: 'row',
-        gap: 12,
+        gap: theme.spacing.md,
     },
     navItem: {
         color: theme.colors.primary,
         fontSize: 16,
         textAlign: 'center',
-        marginVertical: theme.spacing.sm,
+        marginHorizontal: theme.spacing.sm,
     },
     rightNav: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 16,
-    },
-    centerNav: {
-        flexDirection: 'row',
         gap: theme.spacing.md,
     },
     logo: {
         width: 40,
         height: 40,
         opacity: 0.9,
-    },
-    logoContainer: {
-        marginRight: theme.spacing.md,
     },
     iconContainer: {
         position: 'relative',
@@ -204,9 +211,5 @@ const styles = StyleSheet.create({
         paddingVertical: theme.spacing.sm,
         zIndex: 1000,
         borderTopColor: theme.colors.border,
-    },
-    empLabel: {
-        fontStyle: 'italic',
-        color: theme.colors.secondaryText,
     },
 });

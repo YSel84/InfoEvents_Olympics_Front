@@ -1,6 +1,6 @@
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { theme } from '../../styles/theme';
+import { theme } from '../../../styles/theme';
 import { useAuthStore } from '@/stores/authStore';
 
 export default function TabBar() {

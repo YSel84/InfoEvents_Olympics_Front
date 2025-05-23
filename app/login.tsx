@@ -20,7 +20,7 @@ import { useAuthStore } from '../stores/authStore';
 import { theme } from '../styles/theme';
 
 //Components
-import WebWrapper from './components/WebWrapper';
+import WebWrapper from './components/utils/WebWrapper';
 import MainButton from './components/ui/MainButton';
 
 export default function LoginPage() {

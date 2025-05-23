@@ -8,7 +8,7 @@ import { useOfferStore } from '@/stores/offerStore';
 
 // Style & components
 import { theme } from '../styles/theme';
-import WebWrapper from './components/WebWrapper';
+import WebWrapper from './components/utils/WebWrapper';
 import MainButton from './components/ui/MainButton';
 import QuantityControls from './components/ui/QuantityControls';
 import ActionGroup from './components/ui/ActionGroup';

@@ -12,7 +12,7 @@ import { theme } from '../../styles/theme';
 import { useCartStore } from '@/stores/cartStore';
 import { useOfferStore } from '@/stores/offerStore';
 import MainButton from '../components/ui/MainButton';
-import WebWrapper from '../components/WebWrapper';
+import WebWrapper from '../components/utils/WebWrapper';
 import TicketOffersModal from '../components/TicketOffersModal';
 import WebOfferDrawer from '../components/WebOfferDrawer';
 import { fetchEventById } from '../lib/_eventService';
@@ -55,7 +55,7 @@ export default function EventDetail() {
         setShowOfferPanel(false);
     };
 
-    // Fermeture du panneau/modal
+    // Close modal
     const closePanel = () => {
         resetQuantities();
         setShowOfferPanel(false);

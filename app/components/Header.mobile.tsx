@@ -50,26 +50,9 @@ export default function HeaderMobile() {
                 </Text>
 
                 <View style={styles.icons}>
-                    {/* Cart icon visible to guests and non-employees */}
-                    {!isEmployee && (
-                        <TouchableOpacity
-                            style={styles.cartButton}
-                            onPress={() => router.push('/cart')}
-                        >
-                            <View style={styles.iconContainer}>
-                                <Ionicons
-                                    name="cart-outline"
-                                    size={24}
-                                    color={theme.colors.primary}
-                                />
-                                <Badge value={total} />
-                            </View>
-                        </TouchableOpacity>
-                    )}
-
                     {user ? (
                         isEmployee ? (
-                            // Employee icons: scan & logout
+                            /* employee buttons… */
                             <>
                                 <TouchableOpacity
                                     onPress={() => router.push('/scan')}
@@ -94,16 +77,28 @@ export default function HeaderMobile() {
                                 </TouchableOpacity>
                             </>
                         ) : (
-                            // Authenticated user (not employee): account & logout
+                            /* utilisateur classique */
                             <>
                                 <TouchableOpacity
-                                    onPress={() => router.push('/account')}
+                                    onPress={() => router.push('/tickets')}
                                 >
                                     <Ionicons
-                                        name="person-outline"
+                                        name="receipt-outline"
                                         size={22}
                                         color={theme.colors.primary}
                                     />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => router.push('/cart')}
+                                >
+                                    <View style={styles.iconContainer}>
+                                        <Ionicons
+                                            name="cart-outline"
+                                            size={24}
+                                            color={theme.colors.primary}
+                                        />
+                                        <Badge value={total} />
+                                    </View>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => {
@@ -120,7 +115,6 @@ export default function HeaderMobile() {
                             </>
                         )
                     ) : (
-                        // Guest user: login icon
                         <TouchableOpacity onPress={() => router.push('/login')}>
                             <Ionicons
                                 name="person-outline"

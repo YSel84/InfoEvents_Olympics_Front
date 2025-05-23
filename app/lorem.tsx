@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { theme } from '../styles/theme';
-import WebWrapper from './components/WebWrapper';
+import WebWrapper from './components/utils/WebWrapper';
 
 export default function LoremIpsum() {
     return (

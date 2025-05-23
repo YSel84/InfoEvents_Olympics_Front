@@ -14,8 +14,8 @@ import { useRouter } from 'expo-router';
 
 //components
 import Card from './components/ui/Card';
-import WebWrapper from './components/WebWrapper';
-import ScrollContainer from './components/ScrollContainer';
+import WebWrapper from './components/utils/WebWrapper';
+import ScrollContainer from './components/ui/ScrollContainer';
 import MainButton from './components/ui/MainButton';
 
 //Styles & Data
