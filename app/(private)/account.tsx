@@ -12,7 +12,7 @@ export default function AccountScreen() {
 
     //not connected => login
     if (!user) {
-        router.replace('login');
+        router.replace('/login');
         return null;
     }
 
@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontWeight: 'bold',
         marginBottom: 12,
+        color: theme.colors.primary,
     },
     text: {
         fontSize: 16,

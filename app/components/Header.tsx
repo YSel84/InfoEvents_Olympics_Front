@@ -117,9 +117,10 @@ export default function HeaderWeb() {
                 {!user && (
                     <TouchableOpacity
                         onPress={() =>
-                            router.push(
-                                `login?redirectTo=${encodeURIComponent(pathname)}`,
-                            )
+                            router.push({
+                                pathname: '/login',
+                                params: { redirectTo: pathname },
+                            })
                         }
                     >
                         <Text style={styles.navItem}>Se connecter</Text>
