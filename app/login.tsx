@@ -42,7 +42,7 @@ export default function LoginPage() {
     useEffect(() => {
         if (user) {
             if (target) {
-                router.replace(`/${target.toString().toLowerCase()}`);
+                router.replace(`${target.toString().toLowerCase()}`);
             } else {
                 router.replace('/account');
             }

@@ -12,13 +12,14 @@ export default function AccountScreen() {
 
     //not connected => login
     if (!user) {
-        router.replace('login');
+        router.replace('/login');
         return null;
     }
 
     //check if user is Employee & if on the web version
     const isEmployee = roles.includes('EMPLOYEE');
     const isWeb = Platform.OS === 'web';
+    const isAdmin = roles.includes('ADMIN');
 
     return (
         <WebWrapper>
@@ -44,13 +45,35 @@ export default function AccountScreen() {
                             )}
                         </>
                     )}
+                    {/* Admin tools section */}
+                    {isAdmin && (
+                        <View style={styles.adminSection}>
+                            <Text style={styles.adminHeading}>
+                                Outils d'administration
+                            </Text>
+                            <MainButton
+                                label="Gérer les offres"
+                                onPress={() => router.push('/admin/offers')}
+                                style={{ width: 220 }}
+                            />
+                            <MainButton
+                                label="Gérer les événements"
+                                onPress={() => router.push('/admin/events')}
+                                style={[styles.secondButton, { width: 220 }]}
+                            />
+                        </View>
+                    )}
+
                     <MainButton
                         label="Déconnexion"
                         onPress={() => {
                             logout();
                             router.replace('/login');
                         }}
-                        style={{ backgroundColor: theme.colors.danger }}
+                        style={{
+                            backgroundColor: theme.colors.secondaryText,
+                            marginTop: theme.spacing.md,
+                        }}
                     />
                 </View>
             </ScrollView>
@@ -69,6 +92,7 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontWeight: 'bold',
         marginBottom: 12,
+        color: theme.colors.primary,
     },
     text: {
         fontSize: 16,
@@ -82,5 +106,24 @@ const styles = StyleSheet.create({
         color: theme.colors.secondaryText,
         fontSize: 16,
         lineHeight: 22,
+    },
+    adminSection: {
+        marginTop: 32,
+        padding: 16,
+        alignItems: 'center',
+
+        borderRadius: 8,
+        backgroundColor: theme.colors.surface,
+        width: '100%',
+    },
+    adminHeading: {
+        fontSize: 20,
+        fontWeight: '600',
+        marginBottom: 16,
+        textAlign: 'center',
+        color: theme.colors.primary,
+    },
+    secondButton: {
+        marginTop: 12,
     },
 });

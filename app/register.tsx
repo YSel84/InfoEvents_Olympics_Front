@@ -17,6 +17,7 @@ import { useAuthStore } from '../stores/authStore';
 
 import MainButton from './components/ui/MainButton';
 import { DatePickerField } from './components/ui/DatePicker';
+import WebWrapper from './components/utils/WebWrapper';
 import { theme } from '../styles/theme';
 
 export default function RegisterPage() {
@@ -56,56 +57,71 @@ export default function RegisterPage() {
     };
 
     return (
-        <KeyboardAvoidingView behavior="padding" style={styles.container}>
-            <Text style={styles.title}>Créer un compte</Text>
-            {error ? <Text style={styles.error}>{error}</Text> : null}
-            {isLoading ? (
-                <ActivityIndicator size="large" color={theme.colors.primary} />
-            ) : null}
+        <WebWrapper>
+            <KeyboardAvoidingView behavior="padding" style={styles.container}>
+                <Text style={styles.title}>Créer un compte</Text>
+                {error ? <Text style={styles.error}>{error}</Text> : null}
+                {isLoading ? (
+                    <ActivityIndicator
+                        size="large"
+                        color={theme.colors.primary}
+                    />
+                ) : null}
 
-            <TextInput
-                placeholder="Prénom"
-                style={styles.input}
-                value={firstName}
-                onChangeText={setFirstName}
-            />
-            <TextInput
-                placeholder="Nom"
-                style={styles.input}
-                value={lastName}
-                onChangeText={setLastName}
-            />
-            <TextInput
-                placeholder="Email"
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-            />
-            <DatePickerField date={dateOfBirth} onChange={setDateOfBirth} />
-            <TextInput
-                placeholder="Mot de passe"
-                style={styles.input}
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-            />
-            <TextInput
-                placeholder="Confirmer le mot de passe"
-                style={styles.input}
-                secureTextEntry
-                value={confirm}
-                onChangeText={setConfirm}
-                autoCapitalize="none"
-                autoCorrect={false}
-            />
-            <MainButton label="S'inscrire" onPress={handleSubmit} />
-            <Text style={styles.link} onPress={() => router.push('/login')}>
-                Déjà un compte? Connectez-vous.{' '}
-            </Text>
-        </KeyboardAvoidingView>
+                <TextInput
+                    placeholder="Prénom"
+                    style={styles.input}
+                    value={firstName}
+                    onChangeText={setFirstName}
+                />
+                <TextInput
+                    placeholder="Nom"
+                    style={styles.input}
+                    value={lastName}
+                    onChangeText={setLastName}
+                />
+                <TextInput
+                    placeholder="Email"
+                    style={styles.input}
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                />
+                <DatePickerField
+                    value={dateOfBirth}
+                    onChange={setDateOfBirth}
+                    placeholder="Date de naissance"
+                    includeTime={false}
+                />
+                <TextInput
+                    placeholder="Mot de passe"
+                    style={styles.input}
+                    secureTextEntry
+                    value={password}
+                    onChangeText={setPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                />
+                <TextInput
+                    placeholder="Confirmer le mot de passe"
+                    style={styles.input}
+                    secureTextEntry
+                    value={confirm}
+                    onChangeText={setConfirm}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                />
+                <MainButton
+                    label="S'inscrire"
+                    onPress={handleSubmit}
+                    fullWidth
+                    style={{ marginTop: theme.spacing.md }}
+                />
+                <Text style={styles.link} onPress={() => router.push('/login')}>
+                    Déjà un compte? Connectez-vous.{' '}
+                </Text>
+            </KeyboardAvoidingView>
+        </WebWrapper>
     );
 }
 
