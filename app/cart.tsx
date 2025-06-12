@@ -152,7 +152,6 @@ export default function CartScreen() {
                                 {
                                     label: 'Valider le panier et passer au paiement',
                                     onPress: onValidate,
-                                    size: 'large',
                                 },
                                 {
                                     label: 'Continuer mes achats',
