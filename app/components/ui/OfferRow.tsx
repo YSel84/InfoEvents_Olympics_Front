@@ -24,7 +24,7 @@ const OfferRow: React.FC<OfferRowProps> = ({
         Duo: 2,
         Familiale: 4,
     };
-    const ticketCount = ticketCountMap[name] || 0;
+    const ticketCount = ticketCountMap[name] || 1;
     const description = `${ticketCount} billet${ticketCount > 1 ? 's' : ''}`;
 
     return (

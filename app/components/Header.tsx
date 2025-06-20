@@ -7,6 +7,7 @@
     StyleSheet,
     TouchableOpacity,
     useWindowDimensions,
+    Platform,
 } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,7 +15,7 @@ import { theme } from '../../styles/theme';
 import { Image } from 'expo-image';
 import { useCartStore } from '../../stores/cartStore';
 import Badge from './ui/Badge';
-import MainButton from './ui/MainButton';
+
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -29,8 +30,9 @@ export default function HeaderWeb() {
 
     const user = useAuthStore((s) => s.user);
     const roles = useAuthStore((s) => s.roles);
-    const logout = useAuthStore((s) => s.logout);
+
     const isEmployee = user !== null && roles.includes('EMPLOYEE');
+    const isAdmin = user !== null && roles.includes('ADMIN');
 
     const [openNav, setOpenNav] = useState(false);
 
@@ -49,7 +51,7 @@ export default function HeaderWeb() {
             </View>
 
             {/* liens centraux pour les non-employés */}
-            {!isEmployee && (
+            {!isEmployee && !isAdmin && (
                 <View style={styles.centerSection}>
                     {isMobile ? (
                         <TouchableOpacity onPress={() => setOpenNav(!openNav)}>
@@ -82,8 +84,36 @@ export default function HeaderWeb() {
                 </View>
             )}
 
+            {/*Admin : raccourcis gestions */}
+            {isAdmin && (
+                <View style={styles.centerSection}>
+                    <View style={styles.centerNav}>
+                        <TouchableOpacity
+                            onPress={() => router.push('/events')}
+                        >
+                            <Text style={styles.navItem}>
+                                Voir les événements
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => router.push('/admin/offers')}
+                        >
+                            <Text style={styles.navItem}>Gérer les offres</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => router.push('/admin/events')}
+                        >
+                            <Text style={styles.navItem}>
+                                Gérer les événements
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
+
             {/* section droite */}
             <View style={styles.rightNav}>
+                {/* 
                 {user ? (
                     <>
                         <Text style={styles.navItem}>
@@ -97,10 +127,29 @@ export default function HeaderWeb() {
                             }}
                         />
                     </>
-                ) : null}
+                ) : null}*/}
+                {user && (
+                    <TouchableOpacity
+                        onPress={() => router.push('/account')}
+                        style={styles.profileContainer}
+                        //tooltip
+                        {...(Platform.OS === 'web'
+                            ? { title: 'Accéder à mon profil' }
+                            : {})}
+                    >
+                        <Ionicons
+                            name="person-circle-outline"
+                            size={24}
+                            color={theme.colors.primary}
+                        />
+                        <Text style={styles.navItem}>
+                            Bonjour, {user.firstName}
+                        </Text>
+                    </TouchableOpacity>
+                )}
 
                 {/** --- Panier pour tous les non-employés (invités ET utilisateurs) --- **/}
-                {!isEmployee && (
+                {!isEmployee && !isAdmin && (
                     <TouchableOpacity onPress={() => router.push('/cart')}>
                         <View style={styles.iconContainer}>
                             <Ionicons
@@ -118,7 +167,7 @@ export default function HeaderWeb() {
                     <TouchableOpacity
                         onPress={() =>
                             router.push({
-                                pathname: 'login',
+                                pathname: '/login',
                                 params: { redirectTo: pathname },
                             })
                         }
@@ -212,5 +261,13 @@ const styles = StyleSheet.create({
         paddingVertical: theme.spacing.sm,
         zIndex: 1000,
         borderTopColor: theme.colors.border,
+    },
+    profileContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: theme.spacing.sm,
+    },
+    adminButtonSpacing: {
+        marginLeft: theme.spacing.sm,
     },
 });

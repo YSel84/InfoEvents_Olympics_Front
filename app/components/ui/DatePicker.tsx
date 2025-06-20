@@ -1,108 +1,110 @@
 /**
  * Helper/wrapper for cross-platform date-picker
  *
- *
  */
 
+import React, { useState } from 'react';
 import {
     Platform,
-    View,
+    TouchableOpacity,
+    TextInput,
     Text,
     StyleSheet,
-    TouchableOpacity,
 } from 'react-native';
-import DateTimePicker, {
-    DateTimePickerEvent,
-} from '@react-native-community/datetimepicker';
-import { useState } from 'react';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { theme } from '../../../styles/theme';
-import ReactDatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 
-type Props = {
-    date: string;
-    onChange: (isoDate: string) => void;
+interface Props {
+    value: string;
+    onChange: (newVal: string) => void;
     placeholder?: string;
-};
+    includeTime?: boolean;
+}
 
 export function DatePickerField({
-    date,
+    value,
     onChange,
-    placeholder = 'Date de naissance',
+    placeholder = 'Sélectionner une date',
+    includeTime = false,
 }: Props) {
-    const [show, setShow] = useState(false);
-    //format for UI
-    const formatted = date ? new Date(date).toLocaleDateString('fr-FR') : '';
+    const [isVisible, setVisible] = useState(false);
 
-    //Web input HTML date "classic"
+    const handleConfirm = (d: Date) => {
+        setVisible(false);
+        const fmt = includeTime
+            ? format(d, "yyyy-MM-dd'T'HH:mm", { locale: fr })
+            : format(d, 'yyyy-MM-dd', { locale: fr });
+        onChange(fmt);
+    };
+
+    // **Web:** on utilise un input native type="date" au focus
     if (Platform.OS === 'web') {
         return (
-            <ReactDatePicker
-                selected={date ? new Date(date) : null}
-                onChange={(d: Date | null) => {
-                    if (d) {
-                        onChange(d.toISOString().split('T')[0]);
-                    }
+            <TextInput
+                placeholder={placeholder}
+                style={styles.webInput}
+                value={value}
+                placeholderTextColor={theme.colors.buttonText}
+                onFocus={(e: any) => {
+                    e.target.type = includeTime ? 'datetime-local' : 'date';
                 }}
-                placeholderText={placeholder}
-                maxDate={new Date()}
-                dateFormat="yyyy-MM-dd"
-                className=""
+                onChangeText={onChange}
             />
         );
-    } else {
-        //iOS & Android : react native
-        return (
-            <View style={styles.mobileContainer}>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => setShow(true)}
-                >
-                    <Text
-                        style={[styles.buttonText, !date && styles.placeholder]}
-                    >
-                        {date ? formatted : placeholder}
-                    </Text>
-                </TouchableOpacity>
-                {show && (
-                    <DateTimePicker
-                        mode="date"
-                        display="calendar"
-                        value={date ? new Date(date) : new Date()}
-                        maximumDate={new Date()}
-                        onChange={(
-                            _e: DateTimePickerEvent,
-                            selected?: Date,
-                        ) => {
-                            setShow(false);
-                            if (selected) {
-                                onChange(selected.toISOString().split('T')[0]);
-                            }
-                        }}
-                    />
-                )}
-            </View>
-        );
     }
+
+    // **Mobile:** bouton ouvrant un modal « joli »
+    return (
+        <TouchableOpacity
+            style={styles.mobileField}
+            onPress={() => setVisible(true)}
+            activeOpacity={0.7}
+        >
+            <Text style={[styles.text, !value && styles.placeholder]}>
+                {value
+                    ? includeTime
+                        ? format(new Date(value), 'dd MMM yyyy HH:mm', {
+                              locale: fr,
+                          })
+                        : format(new Date(value), 'dd MMM yyyy', { locale: fr })
+                    : placeholder}
+            </Text>
+            <DateTimePickerModal
+                isVisible={isVisible}
+                mode={includeTime ? 'datetime' : 'date'}
+                maximumDate={new Date()}
+                onConfirm={handleConfirm}
+                onCancel={() => setVisible(false)}
+            />
+        </TouchableOpacity>
+    );
 }
 
 const styles = StyleSheet.create({
-    mobileContainer: {
+    webInput: {
+        borderWidth: 1,
+        borderColor: theme.colors.page,
+        backgroundColor: theme.colors.secondaryText,
+        borderRadius: theme.borderRadius,
+        padding: theme.spacing.md,
         marginBottom: theme.spacing.sm,
+        color: theme.colors.buttonText,
     },
-    button: {
-        paddingVertical: theme.spacing.sm,
-        paddingHorizontal: theme.spacing.md,
+    mobileField: {
         borderWidth: 1,
         borderColor: theme.colors.secondaryText,
-        borderRadius: theme.borderRadius,
         backgroundColor: theme.colors.surface,
+        borderRadius: theme.borderRadius,
+        paddingVertical: theme.spacing.sm,
+        paddingHorizontal: theme.spacing.md,
+        marginBottom: theme.spacing.sm,
     },
-    buttonText: {
+    text: {
         color: theme.colors.text,
-        fontSize: 16,
     },
     placeholder: {
-        color: theme.colors.secondaryText,
+        color: theme.colors.text,
     },
 });
